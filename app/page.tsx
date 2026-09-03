@@ -1,50 +1,73 @@
 import Link from "next/link";
 
+const platforms = ["UBER", "BOLT", "STAXI", "WELCOME PICKUPS"];
+
 const benefits = [
   {
     number: "01",
     title: "Professionele taxi-auto",
-    text: "Rijd in een moderne auto die geschikt is voor professioneel taxivervoer.",
+    text: "Rijd met een moderne, representatieve auto die klaar is voor professioneel taxivervoer.",
   },
   {
     number: "02",
     title: "All-in ondersteuning",
-    text: "Wij regelen de belangrijke zaken rondom je voertuig, zodat jij kunt focussen op rijden.",
+    text: "Wij regelen het beheer rondom je voertuig, zodat jij je kunt focussen op rijden.",
   },
   {
     number: "03",
-    title: "Meerdere rijplatforms",
-    text: "Vergroot je mogelijkheden met Uber, Bolt, Staxi en Welcome Pickups.",
+    title: "Meerdere platforms",
+    text: "Combineer verschillende rijplatforms en creëer meer mogelijkheden om omzet te maken.",
   },
   {
     number: "04",
-    title: "24/7 ondersteuning",
-    text: "Je staat er niet alleen voor. Imperial Cabs is er voor onze chauffeurs.",
+    title: "Persoonlijke support",
+    text: "Van onboarding tot dagelijkse vragen: Imperial Cabs staat voor je klaar.",
   },
 ];
-
-const platforms = ["UBER", "BOLT", "STAXI", "WELCOME PICKUPS"];
 
 const steps = [
   {
     number: "01",
     title: "Meld je aan",
-    text: "Laat je gegevens achter en vertel ons meer over jezelf.",
+    text: "Laat je gegevens achter en vertel ons meer over jouw ervaring als chauffeur.",
   },
   {
     number: "02",
-    title: "We controleren je gegevens",
-    text: "Samen zorgen we dat alle benodigde documenten en voorwaarden op orde zijn.",
+    title: "Wij controleren",
+    text: "We nemen je aanvraag door en bespreken samen de mogelijkheden.",
   },
   {
     number: "03",
     title: "Kies je voertuig",
-    text: "Bekijk de beschikbare voertuigen en kies wat bij jou past.",
+    text: "Kies een beschikbare taxi-auto die past bij jouw manier van rijden.",
   },
   {
     number: "04",
     title: "Start met rijden",
-    text: "Alles geregeld? Dan ben je klaar om professioneel te gaan rijden.",
+    text: "Je ontvangt de benodigde informatie en kunt professioneel aan de slag.",
+  },
+];
+
+const faqs = [
+  {
+    question: "Voor welke platforms kan ik rijden?",
+    answer:
+      "Imperial Cabs richt zich op chauffeurs die actief zijn of willen worden op onder andere Uber, Bolt, Staxi en Welcome Pickups.",
+  },
+  {
+    question: "Wat regelt Imperial Cabs?",
+    answer:
+      "Wij richten ons op het leveren en beheren van taxi-voertuigen en ondersteuning voor chauffeurs. De exacte inhoud van een pakket wordt tijdens de onboarding besproken.",
+  },
+  {
+    question: "In welke regio zijn jullie actief?",
+    answer:
+      "Momenteel richten wij ons op Amsterdam en omgeving.",
+  },
+  {
+    question: "Kan ik mij aanmelden als ik nog geen chauffeur ben?",
+    answer:
+      "Ja. Laat je gegevens achter via het aanvraagformulier. We kunnen vervolgens bespreken wat je nodig hebt om te starten.",
   },
 ];
 
@@ -52,31 +75,31 @@ export default function Home() {
   return (
     <main>
       {/* NAVIGATION */}
-      <header className="navbar">
-        <div className="nav-container">
+      <nav className="site-nav">
+        <div className="nav-inner">
           <Link href="/" className="logo">
             IMPERIAL<span>CABS</span>
           </Link>
 
-          <nav className="desktop-nav">
+          <div className="nav-links">
             <Link href="#voordelen">Voordelen</Link>
             <Link href="#wagenpark">Wagenpark</Link>
             <Link href="#hoe-het-werkt">Hoe het werkt</Link>
             <Link href="#faq">FAQ</Link>
-          </nav>
+          </div>
 
           <Link href="#aanmelden" className="nav-cta">
             Word chauffeur
           </Link>
         </div>
-      </header>
+      </nav>
 
       {/* HERO */}
-      <section className="hero">
+      <section className="hero-section">
         <div className="hero-grid">
-
           <div className="hero-copy">
             <div className="eyebrow">
+              <span className="eyebrow-dot" />
               TAXI FLEET MANAGEMENT
             </div>
 
@@ -87,8 +110,8 @@ export default function Home() {
             </h1>
 
             <p className="hero-description">
-              Professionele taxi-auto's en ondersteuning voor
-              chauffeurs in Amsterdam & omgeving.
+              Professionele taxi-auto&apos;s en ondersteuning voor chauffeurs
+              in Amsterdam &amp; omgeving.
             </p>
 
             <div className="hero-actions">
@@ -97,57 +120,57 @@ export default function Home() {
                 <span>→</span>
               </Link>
 
-              <Link href="#hoe-het-werkt" className="button button-outline">
+              <Link href="#hoe-het-werkt" className="button button-secondary">
                 Hoe het werkt
               </Link>
             </div>
 
             <div className="hero-note">
-              <span className="status-dot" />
-              Nu chauffeurs gezocht in Amsterdam & omgeving
+              <span>●</span>
+              Nu chauffeurs gezocht in Amsterdam &amp; omgeving
             </div>
           </div>
 
+          {/* HERO VEHICLE VISUAL */}
           <div className="hero-visual">
-            <div className="hero-image">
-              <div className="image-overlay" />
+            <div className="visual-glow" />
+            <div className="visual-label">IMPERIAL FLEET</div>
 
-              <div className="vehicle-content">
-                <div className="vehicle-label">
-                  IMPERIAL CABS
-                </div>
+            <div className="car">
+              <div className="car-roof" />
+              <div className="car-window car-window-left" />
+              <div className="car-window car-window-right" />
 
-                <div className="vehicle-shape">
-                  <div className="vehicle-roof" />
-                  <div className="vehicle-body" />
-                  <div className="wheel wheel-left" />
-                  <div className="wheel wheel-right" />
-                </div>
+              <div className="car-body">
+                <div className="car-light car-light-left" />
+                <div className="car-light car-light-right" />
               </div>
 
-              <div className="hero-badge">
-                <span>01</span>
-                <div>
-                  <strong>Professioneel rijden</strong>
-                  <small>Amsterdam & omgeving</small>
-                </div>
-              </div>
+              <div className="car-wheel car-wheel-left" />
+              <div className="car-wheel car-wheel-right" />
+            </div>
+
+            <div className="visual-bottom">
+              <span>MODERN</span>
+              <span>•</span>
+              <span>ELECTRIC</span>
+              <span>•</span>
+              <span>PROFESSIONAL</span>
             </div>
           </div>
-
         </div>
       </section>
 
       {/* PLATFORMS */}
       <section className="platform-section">
-        <div className="container">
-          <p className="platform-label">
-            MEER MOGELIJKHEDEN OM TE RIJDEN
-          </p>
+        <div className="section-container">
+          <div className="platform-intro">
+            <p>RIJ OP DE PLATFORMS DIE BIJ JOU PASSEN</p>
+          </div>
 
-          <div className="platforms">
+          <div className="platform-grid">
             {platforms.map((platform) => (
-              <div key={platform} className="platform">
+              <div className="platform-card" key={platform}>
                 {platform}
               </div>
             ))}
@@ -156,263 +179,235 @@ export default function Home() {
       </section>
 
       {/* BENEFITS */}
-      <section id="voordelen" className="section">
-        <div className="container">
+      <section className="dark-section" id="voordelen">
+        <div className="section-container">
+          <div className="section-heading">
+            <div className="eyebrow">WAAROM IMPERIAL CABS</div>
 
-          <div className="section-header">
-            <div>
-              <p className="eyebrow">WAAROM IMPERIAL CABS</p>
-
-              <h2>
-                Jij focust op
-                <br />
-                <span>de rit.</span>
-              </h2>
-            </div>
+            <h2>
+              Meer focus op
+              <br />
+              <span>jouw rit.</span>
+            </h2>
 
             <p>
-              Wij zorgen voor de ondersteuning rondom jouw
-              voertuig en helpen je om professioneel te kunnen
-              rijden.
+              Wij nemen het voertuigbeheer en de ondersteuning uit handen,
+              zodat jij je kunt richten op wat belangrijk is: rijden.
             </p>
           </div>
 
           <div className="benefit-grid">
             {benefits.map((benefit) => (
-              <article className="benefit-card" key={benefit.number}>
-                <span className="card-number">
-                  {benefit.number}
-                </span>
-
-                <div className="benefit-icon">
-                  +
-                </div>
+              <div className="benefit-card" key={benefit.number}>
+                <div className="benefit-number">{benefit.number}</div>
 
                 <h3>{benefit.title}</h3>
 
                 <p>{benefit.text}</p>
-              </article>
+
+                <div className="card-arrow">↗</div>
+              </div>
             ))}
           </div>
-
         </div>
       </section>
 
       {/* FLEET */}
-      <section id="wagenpark" className="fleet-section">
-        <div className="container">
-
-          <div className="section-header fleet-header">
+      <section className="fleet-section" id="wagenpark">
+        <div className="section-container">
+          <div className="fleet-grid">
             <div>
-              <p className="eyebrow dark-eyebrow">
-                ONS WAGENPARK
-              </p>
+              <div className="eyebrow">IMPERIAL FLEET</div>
 
               <h2>
-                Klaar om
+                Moderne
                 <br />
-                <span>te rijden.</span>
-              </h2>
-            </div>
-
-            <p>
-              Wij bouwen aan een modern en efficiënt wagenpark
-              voor professionele chauffeurs.
-            </p>
-          </div>
-
-          <div className="fleet-card">
-
-            <div className="fleet-info">
-              <span className="vehicle-category">
-                ELECTRIC TAXI
-              </span>
-
-              <h3>
-                Moderne elektrische
+                <span>elektrische</span>
                 <br />
                 voertuigen.
-              </h3>
+              </h2>
 
-              <p>
-                Comfortabel voor passagiers. Efficiënt voor
-                chauffeurs. Ontwikkeld voor professioneel
-                gebruik.
+              <p className="fleet-description">
+                Een professionele uitstraling begint bij een professioneel
+                voertuig. Ons wagenpark is gericht op moderne elektrische
+                taxi&apos;s voor dagelijks professioneel gebruik.
               </p>
 
-              <Link href="#aanmelden" className="dark-button">
-                Beschikbaarheid aanvragen →
+              <Link href="#aanmelden" className="button button-dark">
+                Bekijk mogelijkheden <span>→</span>
               </Link>
             </div>
 
-            <div className="fleet-visual">
-              <div className="large-car">
-                <div className="large-car-roof" />
-                <div className="large-car-body" />
-                <div className="large-wheel wheel-left" />
-                <div className="large-wheel wheel-right" />
+            <div className="fleet-card">
+              <div className="fleet-card-top">
+                <span>IMPERIAL CABS</span>
+                <span>EV FLEET</span>
               </div>
 
-              <div className="fleet-glow" />
+              <div className="fleet-car">
+                <div className="fleet-car-window" />
+                <div className="fleet-car-body">
+                  <div className="fleet-light left" />
+                  <div className="fleet-light right" />
+                </div>
+
+                <div className="fleet-wheel left" />
+                <div className="fleet-wheel right" />
+              </div>
+
+              <div className="fleet-card-bottom">
+                <strong>READY TO DRIVE</strong>
+                <span>AMSTERDAM</span>
+              </div>
             </div>
-
           </div>
-
         </div>
       </section>
 
-      {/* PROCESS */}
-      <section id="hoe-het-werkt" className="section">
-        <div className="container">
-
-          <div className="process-heading">
-            <p className="eyebrow">HOE HET WERKT</p>
+      {/* HOW IT WORKS */}
+      <section className="dark-section" id="hoe-het-werkt">
+        <div className="section-container">
+          <div className="section-heading">
+            <div className="eyebrow">ZO WERKT HET</div>
 
             <h2>
-              Van aanmelden
+              Van aanvraag
               <br />
-              <span>naar rijden.</span>
+              naar <span>start.</span>
             </h2>
           </div>
 
-          <div className="steps">
+          <div className="steps-grid">
             {steps.map((step) => (
-              <div className="step" key={step.number}>
-
+              <div className="step-card" key={step.number}>
                 <div className="step-top">
                   <span>{step.number}</span>
-                  <div className="step-line" />
+                  <div />
                 </div>
 
                 <h3>{step.title}</h3>
-
                 <p>{step.text}</p>
-
               </div>
             ))}
           </div>
-
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="cta-section">
-        <div className="container cta-content">
+      {/* BIG CTA */}
+      <section className="lime-section">
+        <div className="cta-container">
+          <div>
+            <div className="eyebrow dark-eyebrow">READY TO DRIVE?</div>
 
-          <p className="eyebrow">
-            IMPERIAL CABS
-          </p>
+            <h2>
+              Klaar om
+              <br />
+              <span>te starten?</span>
+            </h2>
 
-          <h2>
-            Klaar om
-            <br />
-            <span>te starten?</span>
-          </h2>
+            <p>
+              Sluit je aan bij Imperial Cabs en ontdek de mogelijkheden voor
+              professioneel rijden in Amsterdam.
+            </p>
+          </div>
 
-          <p>
-            Meld je aan als chauffeur en ontdek de mogelijkheden
-            bij Imperial Cabs.
-          </p>
-
-          <Link href="#aanmelden" className="button button-primary">
-            Word chauffeur →
+          <Link href="#aanmelden" className="button button-black">
+            Word chauffeur <span>→</span>
           </Link>
-
         </div>
       </section>
 
       {/* APPLICATION */}
-      <section id="aanmelden" className="application-section">
-        <div className="container application-grid">
+      <section className="application-section" id="aanmelden">
+        <div className="section-container">
+          <div className="application-grid">
+            <div className="application-intro">
+              <div className="eyebrow">CHAUFFEUR AANMELDEN</div>
 
-          <div className="application-copy">
-            <p className="eyebrow">CHAUFFEUR WORDEN</p>
+              <h2>
+                Klaar om
+                <br />
+                <span>te rijden?</span>
+              </h2>
 
-            <h2>
-              Jouw volgende
-              <br />
-              <span>rit begint hier.</span>
-            </h2>
+              <p>
+                Laat je gegevens achter. We nemen contact met je op om jouw
+                mogelijkheden bij Imperial Cabs te bespreken.
+              </p>
 
-            <p>
-              Laat je gegevens achter. Ons team neemt contact
-              met je op om de mogelijkheden te bespreken.
-            </p>
+              <div className="contact-info">
+                <div>
+                  <span>EMAIL</span>
+                  <strong>info@imperialcabs.nl</strong>
+                </div>
 
-            <div className="contact-details">
-              <div>
-                <small>EMAIL</small>
-                <a href="mailto:info@imperialcabs.nl">
-                  info@imperialcabs.nl
-                </a>
-              </div>
-
-              <div>
-                <small>REGIO</small>
-                <span>Amsterdam & omgeving</span>
+                <div>
+                  <span>REGIO</span>
+                  <strong>Amsterdam &amp; omgeving</strong>
+                </div>
               </div>
             </div>
-          </div>
 
-          <form className="application-form">
-
-            <div className="form-row">
-              <input
-                type="text"
-                placeholder="Voor- en achternaam"
-                required
-              />
-
-              <input
-                type="tel"
-                placeholder="Telefoonnummer"
-                required
-              />
-            </div>
-
-            <input
-              type="email"
-              placeholder="E-mailadres"
-              required
-            />
-
-            <select required defaultValue="">
-              <option value="" disabled>
-                Heb je taxi-ervaring?
-              </option>
-              <option value="yes">Ja</option>
-              <option value="no">Nee</option>
-            </select>
-
-            <textarea
-              placeholder="Vertel ons kort iets over jezelf..."
-              rows={5}
-            />
-
-            <button
-              type="submit"
-              className="button button-primary form-button"
+            <form
+              className="application-form"
+              action="mailto:info@imperialcabs.nl"
+              method="post"
+              encType="text/plain"
             >
-              Aanvraag versturen →
-            </button>
+              <div className="form-row">
+                <input
+                  type="text"
+                  name="naam"
+                  placeholder="Volledige naam"
+                  required
+                />
 
-            <small className="form-disclaimer">
-              Door dit formulier te versturen ga je akkoord
-              met het verwerken van je gegevens voor het
-              beantwoorden van je aanvraag.
-            </small>
+                <input
+                  type="tel"
+                  name="telefoon"
+                  placeholder="Telefoonnummer"
+                  required
+                />
+              </div>
 
-          </form>
+              <input
+                type="email"
+                name="email"
+                placeholder="E-mailadres"
+                required
+              />
 
+              <select name="ervaring" defaultValue="">
+                <option value="" disabled>
+                  Heb je taxi-ervaring?
+                </option>
+                <option value="ja">Ja</option>
+                <option value="nee">Nee</option>
+              </select>
+
+              <textarea
+                name="bericht"
+                placeholder="Vertel ons kort iets over jezelf..."
+              />
+
+              <button type="submit" className="form-button">
+                Aanvraag versturen <span>→</span>
+              </button>
+
+              <small>
+                Door je aanvraag te versturen, geef je toestemming dat
+                Imperial Cabs contact met je opneemt.
+              </small>
+            </form>
+          </div>
         </div>
       </section>
 
       {/* FAQ */}
-      <section id="faq" className="section faq-section">
-        <div className="container">
-
-          <div className="process-heading">
-            <p className="eyebrow">FAQ</p>
+      <section className="dark-section" id="faq">
+        <div className="section-container">
+          <div className="section-heading faq-heading">
+            <div className="eyebrow">FAQ</div>
 
             <h2>
               Veelgestelde
@@ -421,113 +416,57 @@ export default function Home() {
             </h2>
           </div>
 
-          <div className="faq-list">
-
-            <details>
-              <summary>
-                Welke platforms kan ik gebruiken?
-                <span>+</span>
-              </summary>
-
-              <p>
-                Imperial Cabs richt zich op meerdere
-                rijmogelijkheden, waaronder Uber, Bolt,
-                Staxi en Welcome Pickups, afhankelijk van
-                de voorwaarden die voor jou en het voertuig
-                gelden.
-              </p>
-            </details>
-
-            <details>
-              <summary>
-                Wat is inbegrepen?
-                <span>+</span>
-              </summary>
-
-              <p>
-                Onze oplossing is gericht op het bieden van
-                een professionele taxi-auto en ondersteuning
-                rondom het voertuig. De exacte voorwaarden
-                worden vooraf met je besproken.
-              </p>
-            </details>
-
-            <details>
-              <summary>
-                In welke regio zijn jullie actief?
-                <span>+</span>
-              </summary>
-
-              <p>
-                Imperial Cabs richt zich momenteel op
-                Amsterdam en omgeving.
-              </p>
-            </details>
-
-            <details>
-              <summary>
-                Hoe kan ik chauffeur worden?
-                <span>+</span>
-              </summary>
-
-              <p>
-                Vul het aanvraagformulier in. Ons team neemt
-                vervolgens contact met je op om je situatie,
-                documenten en beschikbare voertuigen te
-                bespreken.
-              </p>
-            </details>
-
+          <div className="faq-grid">
+            {faqs.map((faq) => (
+              <div className="faq-item" key={faq.question}>
+                <h3>{faq.question}</h3>
+                <p>{faq.answer}</p>
+              </div>
+            ))}
           </div>
-
         </div>
       </section>
 
       {/* FOOTER */}
-      <footer className="footer">
+      <footer className="site-footer">
+        <div className="footer-container">
+          <div className="footer-main">
+            <div>
+              <Link href="/" className="footer-logo">
+                IMPERIAL<span>CABS</span>
+              </Link>
 
-        <div className="container footer-grid">
+              <p>
+                Taxi fleet management voor professionele chauffeurs in
+                Amsterdam &amp; omgeving.
+              </p>
+            </div>
 
-          <div>
-            <Link href="/" className="logo">
-              IMPERIAL<span>CABS</span>
-            </Link>
+            <div className="footer-links">
+              <div>
+                <span>MENU</span>
+                <Link href="#voordelen">Voordelen</Link>
+                <Link href="#wagenpark">Wagenpark</Link>
+                <Link href="#hoe-het-werkt">Hoe het werkt</Link>
+                <Link href="#faq">FAQ</Link>
+              </div>
 
-            <p>
-              Professioneel wagenparkbeheer
-              voor taxi-chauffeurs.
-            </p>
+              <div>
+                <span>CONTACT</span>
+                <a href="mailto:info@imperialcabs.nl">
+                  info@imperialcabs.nl
+                </a>
+                <p>Amsterdam &amp; omgeving</p>
+              </div>
+            </div>
           </div>
 
-          <div>
-            <h4>Navigatie</h4>
-
-            <Link href="#voordelen">Voordelen</Link>
-            <Link href="#wagenpark">Wagenpark</Link>
-            <Link href="#hoe-het-werkt">Hoe het werkt</Link>
-            <Link href="#faq">FAQ</Link>
-          </div>
-
-          <div>
-            <h4>Contact</h4>
-
-            <a href="mailto:info@imperialcabs.nl">
-              info@imperialcabs.nl
-            </a>
-
-            <span>Amsterdam & omgeving</span>
-          </div>
-
-        </div>
-
-        <div className="footer-bottom">
-          <div className="container">
-            © 2026 Imperial Cabs B.V. · Alle rechten voorbehouden.
+          <div className="footer-bottom">
+            <span>© 2026 Imperial Cabs B.V.</span>
+            <span>Rijd slimmer. Verdien meer.</span>
           </div>
         </div>
-
       </footer>
-
     </main>
   );
 }
