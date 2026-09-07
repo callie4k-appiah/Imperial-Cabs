@@ -8,16 +8,7 @@ export default function PrivacybeleidPage() {
           ← Terug naar Imperial Cabs
         </Link>
 
-
-
-  <Link href="/privacybeleid">
-    Privacybeleid
-  </Link>
-
-  <Link href="/algemene-voorwaarden">
-    Algemene voorwaarden
-  </Link>
-</div>
+        <div className="eyebrow">IMPERIAL CABS B.V.</div>
 
         <h1>
           Privacy<span>beleid.</span>
@@ -85,7 +76,25 @@ export default function PrivacybeleidPage() {
         </section>
 
         <section>
-          <h2>7. Contact</h2>
+          <h2>7. Bedrijfsgegevens</h2>
+
+          <p>
+            <strong>Imperial Cabs B.V.</strong>
+            <br />
+            KVK: 99325330
+            <br />
+            Taxi Fleet Management
+            <br />
+            Amsterdam &amp; omgeving
+            <br />
+            info@imperialcabs.nl
+            <br />
+            +31 6 24562388
+          </p>
+        </section>
+
+        <section>
+          <h2>8. Contact</h2>
           <p>
             Heb je vragen over dit privacybeleid of over de verwerking
             van je persoonsgegevens? Neem dan contact met ons op via:
