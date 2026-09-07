@@ -1500,3 +1500,348 @@ footer {
     width: 100%;
   }
 }
+/* =========================
+   MOBILE POLISH — FINAL
+========================= */
+
+@media (max-width: 600px) {
+
+  /* ---------- HEADER ---------- */
+
+  .nav-inner {
+    height: 72px;
+    padding: 0 18px;
+  }
+
+  .logo {
+    font-size: 19px;
+    letter-spacing: -0.06em;
+  }
+
+  .nav-button {
+    padding: 10px 16px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+
+  /* ---------- HERO ---------- */
+
+  .hero {
+    min-height: auto;
+  }
+
+  .hero-inner {
+    width: calc(100% - 36px);
+    min-height: auto;
+    padding: 65px 0 45px;
+    gap: 25px;
+  }
+
+  .hero-text h1 {
+    font-size: clamp(48px, 14vw, 62px);
+    line-height: 0.9;
+    letter-spacing: -0.065em;
+  }
+
+  .hero-text p {
+    margin-top: 24px;
+    font-size: 16px;
+    line-height: 1.55;
+  }
+
+  .hero-buttons {
+    margin-top: 28px;
+    gap: 10px;
+  }
+
+  .hero-buttons .button {
+    min-height: 50px;
+    padding: 0 18px;
+    font-size: 13px;
+  }
+
+  .hero-status {
+    margin-top: 20px;
+    font-size: 11px;
+    line-height: 1.5;
+  }
+
+  .hero-image {
+    min-height: auto;
+    padding-top: 10px;
+  }
+
+  .hero-image::before {
+    width: 280px;
+    height: 280px;
+  }
+
+  .hero-image img {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .image-caption {
+    right: 2px;
+    bottom: 0;
+    font-size: 8px;
+  }
+
+
+  /* ---------- PLATFORMS ---------- */
+
+  .platforms {
+    padding: 60px 0;
+  }
+
+  .small-heading {
+    font-size: 10px;
+    line-height: 1.5;
+  }
+
+  .platform-list {
+    gap: 10px;
+    margin-top: 24px;
+  }
+
+  .platform {
+    min-height: 82px;
+    font-size: 19px;
+  }
+
+
+  /* ---------- GENERAL SECTIONS ---------- */
+
+  .section {
+    padding: 75px 0;
+  }
+
+  .section-intro h2,
+  .fleet-text h2,
+  .application h2,
+  .cta h2 {
+    font-size: clamp(44px, 12vw, 58px);
+    line-height: 0.94;
+    letter-spacing: -0.06em;
+  }
+
+
+  /* ---------- BENEFITS ---------- */
+
+  .benefits {
+    gap: 10px;
+    margin-top: 40px;
+  }
+
+  .benefit {
+    min-height: 200px;
+    padding: 24px;
+  }
+
+  .benefit h3 {
+    margin-top: 50px;
+    font-size: 21px;
+  }
+
+
+  /* ---------- FLEET ---------- */
+
+  .fleet {
+    padding: 70px 0;
+  }
+
+  .fleet-layout {
+    gap: 35px;
+  }
+
+  .fleet-text p {
+    margin-top: 20px;
+    font-size: 16px;
+    line-height: 1.55;
+  }
+
+  .fleet .black-button,
+  .fleet .outline-button {
+    margin-top: 25px;
+    color: var(--black);
+  }
+
+  .fleet .outline-button {
+    border-color: rgba(0, 0, 0, 0.22);
+  }
+
+  .fleet .outline-button:hover {
+    color: var(--gold);
+    border-color: var(--gold);
+  }
+
+
+  /* ---------- VEHICLE CAROUSEL ---------- */
+
+  .vehicle-track {
+    gap: 12px;
+    padding: 5px 0 12px;
+  }
+
+  .vehicle-card {
+    flex: 0 0 88%;
+    border-radius: 4px;
+  }
+
+  .vehicle-photo {
+    aspect-ratio: 4 / 3;
+  }
+
+  .vehicle-info {
+    min-height: 100px;
+    padding: 16px;
+  }
+
+  .vehicle-info h3 {
+    font-size: 18px;
+  }
+
+  .vehicle-info p {
+    font-size: 11px;
+  }
+
+  .vehicle-arrow {
+    width: 40px;
+    height: 40px;
+    top: 42%;
+  }
+
+  .vehicle-arrow-left {
+    left: 7px;
+  }
+
+  .vehicle-arrow-right {
+    right: 7px;
+  }
+
+  .vehicle-navigation {
+    margin-top: 14px;
+    gap: 10px;
+  }
+
+
+  /* ---------- HOW IT WORKS ---------- */
+
+  .steps {
+    margin-top: 40px;
+  }
+
+  .step {
+    min-height: 210px;
+    padding: 22px;
+  }
+
+  .step h3 {
+    margin-top: 55px;
+    font-size: 21px;
+  }
+
+
+  /* ---------- CTA ---------- */
+
+  .cta {
+    overflow: hidden;
+  }
+
+  .cta-inner {
+    min-height: auto;
+    padding: 65px 0 70px;
+    gap: 30px;
+  }
+
+  .cta h2 {
+    font-size: clamp(48px, 13vw, 60px);
+  }
+
+  /* BELANGRIJK:
+     gouden tekst op gouden achtergrond voorkomen */
+  .cta h2 span {
+    color: var(--black);
+  }
+
+  .cta p {
+    margin-top: 20px;
+    font-size: 16px;
+    line-height: 1.55;
+  }
+
+  .cta .black-button {
+    margin-top: 0;
+  }
+
+
+  /* ---------- APPLICATION ---------- */
+
+  .application-layout {
+    gap: 45px;
+  }
+
+  .application h2 {
+    font-size: clamp(46px, 13vw, 60px);
+  }
+
+  .contact-details {
+    gap: 18px;
+    margin-top: 35px;
+  }
+
+  .application-form {
+    gap: 11px;
+  }
+
+  .application-form input,
+  .application-form textarea,
+  .application-form select {
+    padding: 15px;
+  }
+
+  .application-form textarea {
+    min-height: 125px;
+  }
+
+  .application-form button {
+    min-height: 52px;
+  }
+
+
+  /* ---------- FAQ ---------- */
+
+  .faq {
+    margin-top: 40px;
+    gap: 10px;
+  }
+
+  .faq-item {
+    padding: 22px;
+  }
+
+  .faq-item h3 {
+    font-size: 17px;
+  }
+
+  .faq-item p {
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+
+  /* ---------- FOOTER ---------- */
+
+  .footer-main {
+    padding-top: 55px;
+    padding-bottom: 35px;
+    gap: 35px;
+  }
+
+  .footer-bottom {
+    padding: 18px 0;
+    gap: 7px;
+    font-size: 10px;
+  }
+}
