@@ -1345,3 +1345,158 @@ footer {
     flex: 0 0 92%;
   }
 }
+/* =========================
+   THANK YOU PAGE
+========================= */
+
+.thank-you-page {
+  min-height: 100vh;
+  background: var(--black);
+  color: var(--white);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 40px 20px;
+}
+
+.thank-you-card {
+  width: 100%;
+  max-width: 680px;
+
+  padding: 70px 50px;
+
+  text-align: center;
+
+  background: var(--dark);
+  border: 1px solid rgba(212, 166, 58, 0.28);
+}
+
+.thank-you-logo {
+  margin-bottom: 45px;
+
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.thank-you-logo span {
+  color: var(--gold);
+}
+
+.thank-you-check {
+  width: 72px;
+  height: 72px;
+
+  margin: 0 auto 30px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid var(--gold);
+  border-radius: 50%;
+
+  color: var(--gold);
+  font-size: 32px;
+  font-weight: 500;
+}
+
+.thank-you-label {
+  margin-bottom: 18px;
+
+  color: var(--gold);
+
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+}
+
+.thank-you-card h1 {
+  margin: 0 0 25px;
+
+  font-size: clamp(42px, 6vw, 70px);
+  line-height: 0.95;
+  letter-spacing: -0.06em;
+  font-weight: 900;
+}
+
+.thank-you-card h1 span {
+  color: var(--gold);
+}
+
+.thank-you-text {
+  max-width: 520px;
+
+  margin: 0 auto 35px;
+
+  color: #999;
+
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.thank-you-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 52px;
+  padding: 0 25px;
+
+  background: var(--gold);
+  color: #080808;
+
+  border-radius: 999px;
+
+  font-size: 14px;
+  font-weight: 800;
+
+  transition: 0.25s ease;
+}
+
+.thank-you-button:hover {
+  background: var(--gold-light);
+  transform: translateY(-2px);
+}
+
+/* =========================
+   THANK YOU MOBILE
+========================= */
+
+@media (max-width: 600px) {
+  .thank-you-page {
+    padding: 20px;
+  }
+
+  .thank-you-card {
+    padding: 50px 25px;
+  }
+
+  .thank-you-logo {
+    margin-bottom: 35px;
+    font-size: 17px;
+  }
+
+  .thank-you-check {
+    width: 64px;
+    height: 64px;
+
+    margin-bottom: 25px;
+
+    font-size: 28px;
+  }
+
+  .thank-you-card h1 {
+    font-size: 44px;
+  }
+
+  .thank-you-text {
+    font-size: 15px;
+  }
+
+  .thank-you-button {
+    width: 100%;
+  }
+}
