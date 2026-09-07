@@ -75,12 +75,12 @@ const faqs = [
   {
     question: "Met welke platforms kan ik rijden?",
     answer:
-      "Je kunt onder andere rijden via Uber, Bolt, Staxi en Welcome Pickups, afhankelijk van je situatie en de voorwaarden van de betreffende platforms.",
+      "Je kunt onder andere rijden via Uber, Bolt en andere platformen, afhankelijk van je situatie en de voorwaarden van de betreffende platforms.",
   },
   {
     question: "Welke auto's biedt Imperial Cabs aan?",
     answer:
-      "Wij richten ons op verschillende elektrische auto's die geschikt zijn voor professioneel taxivervoer. Het beschikbare aanbod kan variëren.",
+      "Wij bieden verschillende elektrische auto's die geschikt zijn voor professioneel taxivervoer. Het beschikbare aanbod kan variëren.",
   },
   {
     question: "Waar zijn jullie actief?",
@@ -90,7 +90,17 @@ const faqs = [
   {
     question: "Kan ik mij aanmelden zonder taxi-ervaring?",
     answer:
-      "Je kunt altijd je gegevens achterlaten. We bekijken vervolgens samen wat er nodig is om professioneel te kunnen starten.",
+      "Je kunt altijd je gegevens achterlaten. We bespreken vervolgens samen je situatie en wat er nodig is om professioneel te kunnen starten.",
+  },
+  {
+    question: "Hoe werkt het aanmelden?",
+    answer:
+      "Vul het aanmeldformulier in met je gegevens. Daarna nemen wij contact met je op om je situatie en de mogelijkheden te bespreken.",
+  },
+  {
+    question: "Heb ik een eigen taxi-auto nodig?",
+    answer:
+      "Nee. Imperial Cabs biedt elektrische taxi-auto's aan voor chauffeurs die professioneel willen rijden. We bespreken samen welk voertuig en welke mogelijkheden bij jou passen.",
   },
 ];
 
@@ -250,10 +260,10 @@ export default function Home() {
             </h1>
 
             <p>
-              Professionele elektrische taxi-auto&apos;s en
-              ondersteuning voor chauffeurs in Amsterdam
-              &amp; omgeving.
-            </p>
+  Professionele elektrische taxi-auto&apos;s,
+  ondersteuning en de vrijheid om te rijden via
+  de platforms die bij jou passen.
+</p>
 
             <div className="hero-buttons">
               <Link
@@ -380,12 +390,12 @@ export default function Home() {
               </span>
             </h2>
 
-            <p>
-              Wij bieden verschillende elektrische
-              auto&apos;s die geschikt zijn voor professioneel
-              taxivervoer. Het beschikbare aanbod kan
-              variëren.
-            </p>
+          <p>
+  Wij bieden elektrische taxi-auto&apos;s voor
+  chauffeurs die professioneel willen rijden.
+  Jij krijgt een voertuig en ondersteuning,
+  zodat jij je kunt focussen op je ritten.
+</p>
 
             <Link
               href="#aanmelden"
