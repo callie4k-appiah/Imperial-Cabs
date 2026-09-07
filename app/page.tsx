@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRef, useState } from "react";
 
-const platforms = ["Uber", "Bolt", "Andere platformen];
+const platforms = ["Uber", "Bolt", "Andere platformen"];
 
 const benefits = [
   {
