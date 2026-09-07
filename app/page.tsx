@@ -606,7 +606,7 @@ export default function Home() {
             className="application-form"
             action="/api/apply"
             method="post"
-            encType="text/plain"
+            
           >
             <div className="form-row">
               <input
