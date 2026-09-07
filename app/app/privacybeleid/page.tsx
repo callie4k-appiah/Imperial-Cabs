@@ -8,7 +8,25 @@ export default function PrivacybeleidPage() {
           ← Terug naar Imperial Cabs
         </Link>
 
-        <div className="eyebrow">IMPERIAL CABS B.V.</div>
+        <div className="footer-column">
+  <small>BEDRIJF</small>
+
+  <span>Imperial Cabs B.V.</span>
+
+  <span>KVK: 99325330</span>
+
+  <span>Taxi Fleet Management</span>
+
+  <span>Amsterdam &amp; omgeving</span>
+
+  <Link href="/privacybeleid">
+    Privacybeleid
+  </Link>
+
+  <Link href="/algemene-voorwaarden">
+    Algemene voorwaarden
+  </Link>
+</div>
 
         <h1>
           Privacy<span>beleid.</span>
