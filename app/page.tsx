@@ -1,3 +1,92 @@
+"use client";
+
+import Link from "next/link";
+
+const platforms = ["Uber", "Bolt", "Staxi", "Welcome Pickups"];
+
+const benefits = [
+  {
+    number: "01",
+    title: "Elektrische taxi-auto's",
+    text: "Moderne elektrische auto's die geschikt zijn voor professioneel taxivervoer.",
+  },
+  {
+    number: "02",
+    title: "Alles goed geregeld",
+    text: "Ondersteuning rondom het voertuig, zodat jij je kunt richten op het rijden.",
+  },
+  {
+    number: "03",
+    title: "Meerdere platforms",
+    text: "Vergroot je mogelijkheden door actief te zijn op verschillende rijplatforms.",
+  },
+  {
+    number: "04",
+    title: "Persoonlijke ondersteuning",
+    text: "Heb je een vraag of loop je ergens tegenaan? Wij staan voor je klaar.",
+  },
+];
+
+const vehicles = [
+  {
+    name: "Kia e-Niro",
+    image: "/kia-e-niro.jpg",
+  },
+  {
+    name: "Hyundai IONIQ 5",
+    image: "/hyundai-ioniq-5.jpg",
+  },
+  {
+    name: "BYD ATTO 3",
+    image: "/byd-atto-3.jpg",
+  },
+  {
+    name: "Tesla Model Y",
+    image: "/tesla-model-y.jpg",
+  },
+];
+
+const steps = [
+  {
+    number: "01",
+    title: "Meld je aan",
+    text: "Vul het formulier in en vertel ons kort iets over jezelf.",
+  },
+  {
+    number: "02",
+    title: "Wij nemen contact op",
+    text: "We bespreken je situatie en bekijken samen de mogelijkheden.",
+  },
+  {
+    number: "03",
+    title: "Kies je auto",
+    text: "We bekijken welke elektrische auto het beste bij jou past.",
+  },
+  {
+    number: "04",
+    title: "Start met rijden",
+    text: "Wanneer alles geregeld is, kun je professioneel aan de slag.",
+  },
+];
+
+const faqs = [
+  {
+    question: "Met welke platforms kan ik rijden?",
+    answer:
+      "Je kunt onder andere rijden via Uber, Bolt, Staxi, Welcome Pickups en andere rijplatforms, afhankelijk van je situatie en de voorwaarden van de betreffende platforms.",
+  },
+  {
+    question: "Welke auto's biedt Imperial Cabs aan?",
+    answer:
+      "Wij bieden verschillende elektrische auto's die geschikt zijn voor professioneel taxivervoer. Het aanbod kan variëren.",
+  },
+  {
+    question: "Zijn de auto's op de website altijd beschikbaar?",
+    answer:
+      "Nee. De auto's op de website geven een indruk van de modellen die mogelijk beschikbaar zijn. Modellen en beschikbaarheid kunnen variëren.",
+  },
+  {
+    question: "Waar zijn jullie actief?",
     answer:
       "Imperial Cabs richt zich momenteel op Amsterdam en omgeving.",
   },
@@ -11,7 +100,6 @@
 export default function Home() {
   return (
     <main>
-      {/* NAVIGATION */}
       <nav className="site-nav">
         <div className="nav-inner">
           <Link href="/" className="logo">
@@ -31,7 +119,6 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* HERO */}
       <section className="hero">
         <div className="hero-inner">
           <div className="hero-text">
@@ -44,8 +131,8 @@ export default function Home() {
             </h1>
 
             <p>
-              Professionele taxi-auto&apos;s en ondersteuning voor chauffeurs
-              in Amsterdam &amp; omgeving.
+              Professionele elektrische taxi-auto&apos;s en ondersteuning
+              voor chauffeurs in Amsterdam &amp; omgeving.
             </p>
 
             <div className="hero-buttons">
@@ -53,7 +140,10 @@ export default function Home() {
                 Word chauffeur →
               </Link>
 
-              <Link href="#hoe-het-werkt" className="button outline-button">
+              <Link
+                href="#hoe-het-werkt"
+                className="button outline-button"
+              >
                 Hoe het werkt
               </Link>
             </div>
@@ -66,19 +156,18 @@ export default function Home() {
 
           <div className="hero-image">
             <img
-              src="https://commons.wikimedia.org/wiki/Special:FilePath/Kia%20e-Niro%20(front).jpg"
-              alt="Kia e-Niro"
+              src="/kia-e-niro.jpg"
+              alt="Elektrische taxi-auto"
             />
 
             <div className="image-caption">
-              <span>KIA e-NIRO</span>
-              <span>VOLLEDIG ELEKTRISCH</span>
+              <span>ELEKTRISCHE MOBILITEIT</span>
+              <span>TAXI FLEET</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* PLATFORMS */}
       <section className="platforms">
         <div className="container">
           <p className="small-heading">
@@ -87,7 +176,7 @@ export default function Home() {
 
           <div className="platform-list">
             {platforms.map((platform) => (
-              <div key={platform} className="platform">
+              <div className="platform" key={platform}>
                 {platform}
               </div>
             ))}
@@ -95,7 +184,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* BENEFITS */}
       <section className="section dark" id="voordelen">
         <div className="container">
           <div className="section-intro">
@@ -127,56 +215,75 @@ export default function Home() {
         </div>
       </section>
 
-      {/* FLEET */}
       <section className="section fleet" id="wagenpark">
         <div className="container fleet-layout">
           <div className="fleet-text">
             <div className="eyebrow">ONS WAGENPARK</div>
 
             <h2>
-              Kia e-Niro.
+              Elektrisch.
               <br />
-              <span>Elektrisch &amp; betrouwbaar.</span>
+              <span>Comfortabel &amp; betrouwbaar.</span>
             </h2>
 
             <p>
-              We starten voornamelijk met de Kia e-Niro. Een ruime en
-              comfortabele elektrische auto die geschikt is voor dagelijks
-              professioneel taxivervoer.
+              Wij bieden verschillende elektrische auto&apos;s die geschikt
+              zijn voor professioneel taxivervoer. Het beschikbare aanbod kan
+              variëren, zodat we kunnen inspelen op de wensen en mogelijkheden
+              van onze chauffeurs.
             </p>
 
-            <Link href="#aanmelden" className="button outline-button">
-              Interesse? Meld je aan →
+            <Link href="#aanmelden" className="button black-button">
+              Bekijk de mogelijkheden →
             </Link>
           </div>
 
-          <div className="fleet-image">
-            <img
-              src="https://commons.wikimedia.org/wiki/Special:FilePath/Kia%20e-Niro%20(front).jpg"
-              alt="Kia e-Niro"
-            />
+          <div className="vehicle-area">
+            <div className="vehicle-carousel">
+              {vehicles.map((vehicle, index) => (
+                <div className="vehicle-card" key={vehicle.name}>
+                  <div className="vehicle-photo">
+                    <img src={vehicle.image} alt={vehicle.name} />
+                  </div>
 
-            <div className="fleet-info">
-              <div>
-                <strong>100%</strong>
-                <span>Elektrisch</span>
+                  <div className="vehicle-info">
+                    <div>
+                      <div className="vehicle-line" />
+
+                      <h3>{vehicle.name}</h3>
+
+                      <p>Volledig elektrisch</p>
+                    </div>
+
+                    <span>0{index + 1}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="vehicle-navigation">
+              <div className="vehicle-dots">
+                {vehicles.map((vehicle, index) => (
+                  <span
+                    key={vehicle.name}
+                    className={
+                      index === 0
+                        ? "vehicle-dot active"
+                        : "vehicle-dot"
+                    }
+                  />
+                ))}
               </div>
 
-              <div>
-                <strong>Automaat</strong>
-                <span>Comfortabel rijden</span>
-              </div>
-
-              <div>
-                <strong>Kia</strong>
-                <span>e-Niro</span>
-              </div>
+              <p>
+                Modellen en beschikbaarheid kunnen variëren. Vraag ons naar de
+                actuele mogelijkheden.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* HOW IT WORKS */}
       <section className="section dark" id="hoe-het-werkt">
         <div className="container">
           <div className="section-intro">
@@ -203,11 +310,12 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA */}
       <section className="cta">
         <div className="container cta-inner">
           <div>
-            <div className="eyebrow dark-eyebrow">IMPERIAL CABS</div>
+            <div className="eyebrow dark-eyebrow">
+              IMPERIAL CABS
+            </div>
 
             <h2>
               Klaar om
@@ -227,7 +335,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* APPLICATION */}
       <section className="section application" id="aanmelden">
         <div className="container application-layout">
           <div>
@@ -245,6 +352,11 @@ export default function Home() {
             </p>
 
             <div className="contact-details">
+              <div>
+                <small>TELEFOON</small>
+                <strong>+31 6 24562388</strong>
+              </div>
+
               <div>
                 <small>EMAIL</small>
                 <strong>info@imperialcabs.nl</strong>
@@ -290,6 +402,7 @@ export default function Home() {
               <option value="" disabled>
                 Heb je taxi-ervaring?
               </option>
+
               <option value="ja">Ja</option>
               <option value="nee">Nee</option>
             </select>
@@ -311,7 +424,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* FAQ */}
       <section className="section dark" id="faq">
         <div className="container">
           <div className="section-intro">
@@ -328,6 +440,7 @@ export default function Home() {
             {faqs.map((faq) => (
               <div className="faq-item" key={faq.question}>
                 <h3>{faq.question}</h3>
+
                 <p>{faq.answer}</p>
               </div>
             ))}
@@ -335,7 +448,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* FOOTER */}
       <footer>
         <div className="container footer-main">
           <div>
@@ -344,36 +456,49 @@ export default function Home() {
             </Link>
 
             <p>
-              Taxi fleet management voor professionele chauffeurs in Amsterdam
-              &amp; omgeving.
+              Taxi fleet management voor professionele chauffeurs in
+              Amsterdam &amp; omgeving.
             </p>
           </div>
 
           <div className="footer-column">
             <small>MENU</small>
+
             <Link href="#voordelen">Voordelen</Link>
             <Link href="#wagenpark">Wagenpark</Link>
-            <Link href="#hoe-het-werkt">Hoe het werkt</Link>
+            <Link href="#hoe-het-werkt">
+              Hoe het werkt
+            </Link>
             <Link href="#faq">FAQ</Link>
           </div>
 
           <div className="footer-column">
             <small>CONTACT</small>
+
+            <a href="tel:+31624562388">
+              +31 6 24562388
+            </a>
+
             <a href="mailto:info@imperialcabs.nl">
               info@imperialcabs.nl
             </a>
+
+            <a
+              href="https://www.imperialcabs.nl"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              www.imperialcabs.nl
+            </a>
+
             <span>Amsterdam &amp; omgeving</span>
           </div>
         </div>
 
         <div className="footer-bottom container">
           <span>© 2026 Imperial Cabs B.V.</span>
-          <span>Rijd slimmer. Verdien meer.</span>
-        </div>
 
-        <div className="image-credit container">
-          Kia e-Niro photo: Fiver, der Hellseher / Wikimedia Commons · CC BY-SA
-          4.0
+          <span>Rijd slimmer. Verdien meer.</span>
         </div>
       </footer>
     </main>
