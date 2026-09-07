@@ -604,7 +604,7 @@ export default function Home() {
 
           <form
             className="application-form"
-            action="mailto:info@imperialcabs.nl"
+            action="/api/apply"
             method="post"
             encType="text/plain"
           >
