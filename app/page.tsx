@@ -5,26 +5,27 @@ import { useRef, useState } from "react";
 
 const platforms = ["Uber", "Bolt", "Andere platformen"];
 
-const benefits = [
+
+  const benefits = [
   {
     number: "01",
     title: "Professionele taxi-auto",
-    text: "Een elektrische auto die geschikt is voor dagelijks professioneel taxivervoer.",
+    text: "Een elektrische taxi-auto die klaar is voor professioneel dagelijks gebruik.",
   },
   {
     number: "02",
     title: "Alles geregeld",
-    text: "Wij ondersteunen je rondom het voertuig, zodat jij je kunt focussen op je ritten.",
+    text: "Wij ondersteunen je rondom je voertuig, zodat jij je kunt focussen op je ritten.",
   },
   {
     number: "03",
     title: "Meerdere platforms",
-    text: "De mogelijkheid om te rijden via verschillende platformen, afhankelijk van je situatie.",
+    text: "Rijd via Uber, Bolt en andere platformen die bij jouw situatie passen.",
   },
   {
     number: "04",
     title: "Persoonlijke ondersteuning",
-    text: "Korte lijnen en persoonlijke begeleiding wanneer je die nodig hebt.",
+    text: "Korte lijnen, duidelijke communicatie en persoonlijke begeleiding wanneer je die nodig hebt.",
   },
 ];
 
@@ -32,22 +33,22 @@ const steps = [
   {
     number: "01",
     title: "Meld je aan",
-    text: "Laat je gegevens achter via het formulier.",
+    text: "Laat je gegevens achter via het aanmeldformulier.",
   },
   {
     number: "02",
-    title: "Wij nemen contact op",
-    text: "We bespreken jouw situatie en de mogelijkheden.",
+    title: "We nemen contact op",
+    text: "We bespreken je situatie, ervaring en mogelijkheden.",
   },
   {
     number: "03",
-    title: "Regel je auto",
-    text: "Samen bekijken we welke elektrische taxi-auto bij jou past.",
+    title: "Kies je voertuig",
+    text: "We bekijken samen welke elektrische taxi-auto bij jou past.",
   },
   {
     number: "04",
     title: "Start met rijden",
-    text: "Je bent klaar om professioneel je ritten te rijden.",
+    text: "Alles geregeld? Dan kun je professioneel aan de slag.",
   },
 ];
 
