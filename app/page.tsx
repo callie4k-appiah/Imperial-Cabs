@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRef, useState } from "react";
 
 const platforms = ["Uber", "Bolt", "Staxi", "Welcome Pickups"];
 
@@ -54,22 +55,18 @@ const vehicles = [
   {
     name: "KIA e-NIRO",
     image: "/kia-e-niro.jpg",
-    text: "Volledig elektrisch",
   },
   {
     name: "HYUNDAI IONIQ 5",
     image: "/hyundai-ioniq-5.jpg",
-    text: "Volledig elektrisch",
   },
   {
     name: "BYD ATTO 3",
     image: "/byd-atto-3.jpg",
-    text: "Volledig elektrisch",
   },
   {
     name: "TESLA MODEL Y",
     image: "/tesla-model-y.jpg",
-    text: "Volledig elektrisch",
   },
 ];
 
@@ -97,6 +94,74 @@ const faqs = [
 ];
 
 export default function Home() {
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const [activeVehicle, setActiveVehicle] = useState(0);
+
+  const scrollToVehicle = (index: number) => {
+    if (!carouselRef.current) return;
+
+    const cards = carouselRef.current.querySelectorAll(
+      ".vehicle-card"
+    );
+
+    const card = cards[index] as HTMLElement;
+
+    if (card) {
+      card.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+        inline: "start",
+      });
+    }
+
+    setActiveVehicle(index);
+  };
+
+  const nextVehicle = () => {
+    const next =
+      activeVehicle === vehicles.length - 1
+        ? 0
+        : activeVehicle + 1;
+
+    scrollToVehicle(next);
+  };
+
+  const previousVehicle = () => {
+    const previous =
+      activeVehicle === 0
+        ? vehicles.length - 1
+        : activeVehicle - 1;
+
+    scrollToVehicle(previous);
+  };
+
+  const handleScroll = () => {
+    if (!carouselRef.current) return;
+
+    const container = carouselRef.current;
+    const cards = container.querySelectorAll(".vehicle-card");
+
+    if (!cards.length) return;
+
+    let closestIndex = 0;
+    let closestDistance = Infinity;
+
+    cards.forEach((card, index) => {
+      const element = card as HTMLElement;
+
+      const distance = Math.abs(
+        element.offsetLeft - container.scrollLeft
+      );
+
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestIndex = index;
+      }
+    });
+
+    setActiveVehicle(closestIndex);
+  };
+
   return (
     <main>
       {/* NAVIGATION */}
@@ -109,11 +174,16 @@ export default function Home() {
           <div className="nav-links">
             <Link href="#voordelen">Voordelen</Link>
             <Link href="#wagenpark">Wagenpark</Link>
-            <Link href="#hoe-het-werkt">Hoe het werkt</Link>
+            <Link href="#hoe-het-werkt">
+              Hoe het werkt
+            </Link>
             <Link href="#faq">FAQ</Link>
           </div>
 
-          <Link href="#aanmelden" className="nav-button">
+          <Link
+            href="#aanmelden"
+            className="nav-button"
+          >
             Word chauffeur
           </Link>
         </div>
@@ -123,7 +193,9 @@ export default function Home() {
       <section className="hero">
         <div className="hero-inner">
           <div className="hero-text">
-            <div className="eyebrow">TAXI FLEET MANAGEMENT</div>
+            <div className="eyebrow">
+              TAXI FLEET MANAGEMENT
+            </div>
 
             <h1>
               Rijd slimmer.
@@ -132,12 +204,16 @@ export default function Home() {
             </h1>
 
             <p>
-              Professionele elektrische taxi-auto&apos;s en ondersteuning
-              voor chauffeurs in Amsterdam &amp; omgeving.
+              Professionele elektrische taxi-auto&apos;s en
+              ondersteuning voor chauffeurs in Amsterdam
+              &amp; omgeving.
             </p>
 
             <div className="hero-buttons">
-              <Link href="#aanmelden" className="button gold-button">
+              <Link
+                href="#aanmelden"
+                className="button gold-button"
+              >
                 Word chauffeur →
               </Link>
 
@@ -178,7 +254,10 @@ export default function Home() {
 
           <div className="platform-list">
             {platforms.map((platform) => (
-              <div key={platform} className="platform">
+              <div
+                key={platform}
+                className="platform"
+              >
                 {platform}
               </div>
             ))}
@@ -187,10 +266,15 @@ export default function Home() {
       </section>
 
       {/* BENEFITS */}
-      <section className="section dark" id="voordelen">
+      <section
+        className="section dark"
+        id="voordelen"
+      >
         <div className="container">
           <div className="section-intro">
-            <div className="eyebrow">WAAROM IMPERIAL CABS?</div>
+            <div className="eyebrow">
+              WAAROM IMPERIAL CABS?
+            </div>
 
             <h2>
               Meer focus op
@@ -199,15 +283,21 @@ export default function Home() {
             </h2>
 
             <p>
-              Wij zorgen voor ondersteuning rondom je voertuig, zodat jij je
-              kunt focussen op professioneel rijden.
+              Wij zorgen voor ondersteuning rondom je
+              voertuig, zodat jij je kunt focussen op
+              professioneel rijden.
             </p>
           </div>
 
           <div className="benefits">
             {benefits.map((benefit) => (
-              <div className="benefit" key={benefit.number}>
-                <span className="number">{benefit.number}</span>
+              <div
+                className="benefit"
+                key={benefit.number}
+              >
+                <span className="number">
+                  {benefit.number}
+                </span>
 
                 <h3>{benefit.title}</h3>
 
@@ -219,20 +309,28 @@ export default function Home() {
       </section>
 
       {/* FLEET */}
-      <section className="section fleet" id="wagenpark">
+      <section
+        className="section fleet"
+        id="wagenpark"
+      >
         <div className="container fleet-layout">
           <div className="fleet-text">
-            <div className="eyebrow">ONS WAGENPARK</div>
+            <div className="eyebrow">
+              ONS WAGENPARK
+            </div>
 
             <h2>
               Elektrisch.
               <br />
-              <span>Comfortabel &amp; betrouwbaar.</span>
+              <span>
+                Comfortabel &amp; betrouwbaar.
+              </span>
             </h2>
 
             <p>
-              Wij bieden verschillende elektrische auto&apos;s die geschikt
-              zijn voor professioneel taxivervoer. Het beschikbare aanbod kan
+              Wij bieden verschillende elektrische
+              auto&apos;s die geschikt zijn voor professioneel
+              taxivervoer. Het beschikbare aanbod kan
               variëren.
             </p>
 
@@ -246,9 +344,16 @@ export default function Home() {
 
           {/* VEHICLE CAROUSEL */}
           <div className="fleet-carousel-wrapper">
-            <div className="fleet-carousel">
+            <div
+              ref={carouselRef}
+              className="fleet-carousel"
+              onScroll={handleScroll}
+            >
               {vehicles.map((vehicle) => (
-                <article className="vehicle-card" key={vehicle.name}>
+                <article
+                  className="vehicle-card"
+                  key={vehicle.name}
+                >
                   <div className="vehicle-image">
                     <img
                       src={vehicle.image}
@@ -257,14 +362,62 @@ export default function Home() {
                   </div>
 
                   <div className="vehicle-info">
-                    <h3>{vehicle.name}</h3>
-                    <p>{vehicle.text}</p>
+                    <div>
+                      <span className="vehicle-label">
+                        IMPERIAL CABS
+                      </span>
+
+                      <h3>{vehicle.name}</h3>
+                    </div>
+
+                    <span className="vehicle-electric">
+                      VOLLEDIG ELEKTRISCH
+                    </span>
                   </div>
                 </article>
               ))}
             </div>
 
-            <div className="fleet-carousel-hint">
+            {/* CAROUSEL CONTROLS */}
+            <div className="carousel-controls">
+              <button
+                type="button"
+                onClick={previousVehicle}
+                aria-label="Vorige auto"
+                className="carousel-button"
+              >
+                ←
+              </button>
+
+              <div className="carousel-dots">
+                {vehicles.map((vehicle, index) => (
+                  <button
+                    key={vehicle.name}
+                    type="button"
+                    onClick={() =>
+                      scrollToVehicle(index)
+                    }
+                    aria-label={`Bekijk ${vehicle.name}`}
+                    className={`carousel-dot ${
+                      activeVehicle === index
+                        ? "active"
+                        : ""
+                    }`}
+                  />
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={nextVehicle}
+                aria-label="Volgende auto"
+                className="carousel-button"
+              >
+                →
+              </button>
+            </div>
+
+            <div className="carousel-caption">
               <span>←</span>
               Swipe om meer auto&apos;s te bekijken
               <span>→</span>
@@ -274,10 +427,15 @@ export default function Home() {
       </section>
 
       {/* HOW IT WORKS */}
-      <section className="section dark" id="hoe-het-werkt">
+      <section
+        className="section dark"
+        id="hoe-het-werkt"
+      >
         <div className="container">
           <div className="section-intro">
-            <div className="eyebrow">ZO WERKT HET</div>
+            <div className="eyebrow">
+              ZO WERKT HET
+            </div>
 
             <h2>
               Van aanvraag
@@ -288,8 +446,13 @@ export default function Home() {
 
           <div className="steps">
             {steps.map((step) => (
-              <div className="step" key={step.number}>
-                <span className="step-number">{step.number}</span>
+              <div
+                className="step"
+                key={step.number}
+              >
+                <span className="step-number">
+                  {step.number}
+                </span>
 
                 <h3>{step.title}</h3>
 
@@ -315,22 +478,30 @@ export default function Home() {
             </h2>
 
             <p>
-              Laat je gegevens achter en ontdek wat Imperial Cabs voor jou kan
-              betekenen.
+              Laat je gegevens achter en ontdek wat
+              Imperial Cabs voor jou kan betekenen.
             </p>
           </div>
 
-          <Link href="#aanmelden" className="button black-button">
+          <Link
+            href="#aanmelden"
+            className="button black-button"
+          >
             Word chauffeur →
           </Link>
         </div>
       </section>
 
       {/* APPLICATION */}
-      <section className="section application" id="aanmelden">
+      <section
+        className="section application"
+        id="aanmelden"
+      >
         <div className="container application-layout">
           <div>
-            <div className="eyebrow">CHAUFFEUR AANMELDEN</div>
+            <div className="eyebrow">
+              CHAUFFEUR AANMELDEN
+            </div>
 
             <h2>
               Klaar om
@@ -339,19 +510,23 @@ export default function Home() {
             </h2>
 
             <p>
-              Laat je gegevens achter. Wij nemen contact met je op om de
-              mogelijkheden te bespreken.
+              Laat je gegevens achter. Wij nemen contact
+              met je op om de mogelijkheden te bespreken.
             </p>
 
             <div className="contact-details">
               <div>
                 <small>EMAIL</small>
-                <strong>info@imperialcabs.nl</strong>
+                <strong>
+                  info@imperialcabs.nl
+                </strong>
               </div>
 
               <div>
                 <small>REGIO</small>
-                <strong>Amsterdam &amp; omgeving</strong>
+                <strong>
+                  Amsterdam &amp; omgeving
+                </strong>
               </div>
             </div>
           </div>
@@ -385,12 +560,21 @@ export default function Home() {
               required
             />
 
-            <select name="ervaring" defaultValue="">
+            <select
+              name="ervaring"
+              defaultValue=""
+            >
               <option value="" disabled>
                 Heb je taxi-ervaring?
               </option>
-              <option value="ja">Ja</option>
-              <option value="nee">Nee</option>
+
+              <option value="ja">
+                Ja
+              </option>
+
+              <option value="nee">
+                Nee
+              </option>
             </select>
 
             <textarea
@@ -403,18 +587,23 @@ export default function Home() {
             </button>
 
             <small>
-              Wij gebruiken je gegevens alleen om contact met je op te nemen
-              over je aanvraag.
+              Wij gebruiken je gegevens alleen om contact
+              met je op te nemen over je aanvraag.
             </small>
           </form>
         </div>
       </section>
 
       {/* FAQ */}
-      <section className="section dark" id="faq">
+      <section
+        className="section dark"
+        id="faq"
+      >
         <div className="container">
           <div className="section-intro">
-            <div className="eyebrow">FAQ</div>
+            <div className="eyebrow">
+              FAQ
+            </div>
 
             <h2>
               Veelgestelde
@@ -425,7 +614,10 @@ export default function Home() {
 
           <div className="faq">
             {faqs.map((faq) => (
-              <div className="faq-item" key={faq.question}>
+              <div
+                className="faq-item"
+                key={faq.question}
+              >
                 <h3>{faq.question}</h3>
                 <p>{faq.answer}</p>
               </div>
@@ -438,22 +630,37 @@ export default function Home() {
       <footer>
         <div className="container footer-main">
           <div>
-            <Link href="/" className="footer-logo">
+            <Link
+              href="/"
+              className="footer-logo"
+            >
               IMPERIAL<span>CABS</span>
             </Link>
 
             <p>
-              Taxi fleet management voor professionele chauffeurs in Amsterdam
-              &amp; omgeving.
+              Taxi fleet management voor professionele
+              chauffeurs in Amsterdam &amp; omgeving.
             </p>
           </div>
 
           <div className="footer-column">
             <small>MENU</small>
-            <Link href="#voordelen">Voordelen</Link>
-            <Link href="#wagenpark">Wagenpark</Link>
-            <Link href="#hoe-het-werkt">Hoe het werkt</Link>
-            <Link href="#faq">FAQ</Link>
+
+            <Link href="#voordelen">
+              Voordelen
+            </Link>
+
+            <Link href="#wagenpark">
+              Wagenpark
+            </Link>
+
+            <Link href="#hoe-het-werkt">
+              Hoe het werkt
+            </Link>
+
+            <Link href="#faq">
+              FAQ
+            </Link>
           </div>
 
           <div className="footer-column">
@@ -463,17 +670,24 @@ export default function Home() {
               info@imperialcabs.nl
             </a>
 
-            <span>Amsterdam &amp; omgeving</span>
+            <span>
+              Amsterdam &amp; omgeving
+            </span>
           </div>
         </div>
 
         <div className="footer-bottom container">
-          <span>© 2026 Imperial Cabs B.V.</span>
-          <span>Rijd slimmer. Verdien meer.</span>
+          <span>
+            © 2026 Imperial Cabs B.V.
+          </span>
+
+          <span>
+            Rijd slimmer. Verdien meer.
+          </span>
         </div>
       </footer>
 
-      {/* CAROUSEL STYLING */}
+      {/* CAROUSEL CSS */}
       <style>{`
         .fleet-carousel-wrapper {
           width: 100%;
@@ -483,10 +697,12 @@ export default function Home() {
         .fleet-carousel {
           display: flex;
           gap: 20px;
+          width: 100%;
           overflow-x: auto;
           scroll-snap-type: x mandatory;
           scrollbar-width: none;
-          padding-bottom: 8px;
+          -webkit-overflow-scrolling: touch;
+          scroll-behavior: smooth;
         }
 
         .fleet-carousel::-webkit-scrollbar {
@@ -495,9 +711,10 @@ export default function Home() {
 
         .vehicle-card {
           flex: 0 0 100%;
+          width: 100%;
           scroll-snap-align: start;
-          background: #0d0d0d;
-          border: 1px solid rgba(212, 175, 55, 0.25);
+          background: #0c0c0c;
+          border: 1px solid rgba(212, 175, 55, 0.28);
           overflow: hidden;
         }
 
@@ -509,62 +726,143 @@ export default function Home() {
         }
 
         .vehicle-image img {
+          display: block;
           width: 100%;
           height: 100%;
           object-fit: cover;
-          display: block;
         }
 
         .vehicle-info {
+          display: flex;
+          align-items: flex-end;
+          justify-content: space-between;
+          gap: 20px;
           padding: 20px 22px 22px;
+        }
+
+        .vehicle-label {
+          display: block;
+          margin-bottom: 6px;
+          color: #777;
+          font-size: 9px;
+          font-weight: 700;
+          letter-spacing: 0.18em;
         }
 
         .vehicle-info h3 {
           margin: 0;
-          color: white;
-          font-size: 22px;
-          letter-spacing: 0.02em;
+          color: #fff;
+          font-size: 23px;
+          line-height: 1.1;
+          letter-spacing: 0.01em;
         }
 
-        .vehicle-info p {
-          margin: 7px 0 0;
+        .vehicle-electric {
+          flex-shrink: 0;
           color: #c9a94a;
-          font-size: 13px;
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
+          font-size: 9px;
+          font-weight: 800;
+          letter-spacing: 0.12em;
+          white-space: nowrap;
         }
 
-        .fleet-carousel-hint {
+        .carousel-controls {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 24px;
+          margin-top: 20px;
+        }
+
+        .carousel-button {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 44px;
+          height: 44px;
+          padding: 0;
+          border: 1px solid rgba(212, 175, 55, 0.45);
+          background: #0d0d0d;
+          color: #c9a94a;
+          font-size: 20px;
+          cursor: pointer;
+          transition: 0.2s ease;
+        }
+
+        .carousel-button:hover {
+          background: #c9a94a;
+          color: #080808;
+        }
+
+        .carousel-dots {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .carousel-dot {
+          width: 7px;
+          height: 7px;
+          padding: 0;
+          border: 0;
+          border-radius: 50%;
+          background: #555;
+          cursor: pointer;
+          transition: 0.2s ease;
+        }
+
+        .carousel-dot.active {
+          width: 24px;
+          border-radius: 10px;
+          background: #c9a94a;
+        }
+
+        .carousel-caption {
           display: flex;
           justify-content: center;
           align-items: center;
-          gap: 12px;
-          margin-top: 16px;
+          gap: 10px;
+          margin-top: 12px;
           color: #777;
-          font-size: 11px;
+          font-size: 10px;
           letter-spacing: 0.08em;
           text-transform: uppercase;
         }
 
-        .fleet-carousel-hint span {
+        .carousel-caption span {
           color: #c9a94a;
-          font-size: 17px;
-        }
-
-        @media (min-width: 901px) {
-          .vehicle-card {
-            flex-basis: 100%;
-          }
+          font-size: 16px;
         }
 
         @media (max-width: 900px) {
-          .fleet-carousel {
-            margin-right: -18px;
-            padding-right: 18px;
+          .vehicle-card {
+            flex-basis: 92%;
           }
 
+          .fleet-carousel {
+            gap: 14px;
+            padding-right: 8%;
+          }
+
+          .vehicle-info {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+          }
+        }
+
+        @media (max-width: 600px) {
           .vehicle-card {
             flex-basis: 88%;
+          }
+
+          .carousel-controls {
+            gap: 18px;
+          }
+
+          .carousel-button {
+            width: 40px;
+            height: 40px;
           }
         }
       `}</style>
