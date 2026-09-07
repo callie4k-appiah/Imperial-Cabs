@@ -6,13 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start"
-  }
+  },
   "dependencies": {
-  "next": "latest",
-  "react": "latest",
-  "react-dom": "latest",
-  "resend": "latest"
-}
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "resend": "latest"
+  },
   "devDependencies": {
     "typescript": "latest",
     "@types/node": "latest",
