@@ -15,18 +15,12 @@ export const metadata: Metadata = {
   keywords: [
     "Imperial Cabs",
     "taxi fleet management",
-    "taxi auto huren Amsterdam",
     "taxi chauffeur Amsterdam",
     "elektrische taxi Amsterdam",
     "taxi wagenpark Amsterdam",
   ],
 
-  authors: [
-    {
-      name: "Imperial Cabs B.V.",
-    },
-  ],
-
+  authors: [{ name: "Imperial Cabs B.V." }],
   creator: "Imperial Cabs B.V.",
   publisher: "Imperial Cabs B.V.",
 
@@ -47,6 +41,12 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
+  },
+
+  icons: {
+    icon: "/imperial-cabs-favicon.png",
+    shortcut: "/imperial-cabs-favicon.png",
+    apple: "/imperial-cabs-favicon.png",
   },
 };
 
