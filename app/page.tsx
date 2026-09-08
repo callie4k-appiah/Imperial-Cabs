@@ -427,14 +427,13 @@ export default function Home() {
                     />
                   </div>
 
-                  <div className="vehicle-info">
-                    <div>
-                      <span className="vehicle-label">
-                        IMPERIAL CABS
-                      </span>
-
-                      <h3>{vehicle.name}</h3>
-                    </div>
+                 <div className="vehicle-card">
+  <img
+    src={vehicle.image}
+    alt={vehicle.name}
+    className="vehicle-image"
+  />
+</div>
 
                     <span className="vehicle-electric">
                       VOLLEDIG ELEKTRISCH
