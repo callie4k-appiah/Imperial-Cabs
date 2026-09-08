@@ -5,8 +5,7 @@ import { useRef, useState } from "react";
 
 const platforms = ["Uber", "Bolt", "Andere platformen"];
 
-
-  const benefits = [
+const benefits = [
   {
     number: "01",
     title: "Professionele taxi-auto",
@@ -108,11 +107,6 @@ export default function Home() {
   const carouselRef = useRef<HTMLDivElement>(null);
   const [activeVehicle, setActiveVehicle] = useState(0);
 
-  /*
-   * Berekent automatisch de breedte van één kaart + de ruimte
-   * tussen de kaarten. Hierdoor gaat iedere pijl exact één
-   * voertuig vooruit of achteruit.
-   */
   const getVehicleStep = () => {
     const container = carouselRef.current;
 
@@ -144,10 +138,6 @@ export default function Home() {
       return;
     }
 
-    /*
-     * Zorgt ervoor dat bij de eerste auto → terug naar de laatste
-     * gaat en bij de laatste auto → terug naar de eerste.
-     */
     const safeIndex =
       ((index % vehicles.length) + vehicles.length) %
       vehicles.length;
@@ -174,10 +164,6 @@ export default function Home() {
     scrollToVehicle(activeVehicle - 1);
   };
 
-  /*
-   * Wanneer iemand met zijn vinger swipet, wordt automatisch
-   * bepaald welke auto het dichtst bij de positie staat.
-   */
   const handleScroll = () => {
     const container = carouselRef.current;
 
@@ -260,10 +246,10 @@ export default function Home() {
             </h1>
 
             <p>
-  Professionele elektrische taxi-auto&apos;s,
-  ondersteuning en de vrijheid om te rijden via
-  de platforms die bij jou passen.
-</p>
+              Professionele elektrische taxi-auto&apos;s,
+              ondersteuning en de vrijheid om te rijden via
+              de platforms die bij jou passen.
+            </p>
 
             <div className="hero-buttons">
               <Link
@@ -390,12 +376,12 @@ export default function Home() {
               </span>
             </h2>
 
-          <p>
-  Wij bieden elektrische taxi-auto&apos;s voor
-  chauffeurs die professioneel willen rijden.
-  Jij krijgt een voertuig en ondersteuning,
-  zodat jij je kunt focussen op je ritten.
-</p>
+            <p>
+              Wij bieden elektrische taxi-auto&apos;s voor
+              chauffeurs die professioneel willen rijden.
+              Jij krijgt een voertuig en ondersteuning,
+              zodat jij je kunt focussen op je ritten.
+            </p>
 
             <Link
               href="#aanmelden"
@@ -406,74 +392,77 @@ export default function Home() {
           </div>
 
           {/* =========================
-              IMPROVED VEHICLE CAROUSEL
+              VEHICLE CAROUSEL
           ========================== */}
-         {/* =========================
-    IMPROVED VEHICLE CAROUSEL
-========================== */}
-<div className="fleet-carousel-wrapper">
-  <div
-    ref={carouselRef}
-    className="fleet-carousel"
-    onScroll={handleScroll}
-  >
-    {vehicles.map((vehicle) => (
-      <article
-        className="vehicle-card"
-        key={vehicle.name}
-      >
-        <div className="vehicle-image">
-          <img
-            src={vehicle.image}
-            alt={`${vehicle.name} - Imperial Cabs`}
-            draggable="false"
-          />
+          <div className="fleet-carousel-wrapper">
+            <div
+              ref={carouselRef}
+              className="fleet-carousel"
+              onScroll={handleScroll}
+            >
+              {vehicles.map((vehicle) => (
+                <article
+                  className="vehicle-card"
+                  key={vehicle.name}
+                >
+                  <div className="vehicle-image">
+                    <img
+                      src={vehicle.image}
+                      alt={`${vehicle.name} - Imperial Cabs`}
+                      draggable="false"
+                    />
+                  </div>
+                </article>
+              ))}
+            </div>
+
+            {/* CONTROLS */}
+            <div className="carousel-controls">
+              <button
+                type="button"
+                onClick={previousVehicle}
+                aria-label="Vorige auto"
+                className="carousel-button"
+              >
+                ←
+              </button>
+
+              <div className="carousel-dots">
+                {vehicles.map((vehicle, index) => (
+                  <button
+                    key={vehicle.name}
+                    type="button"
+                    onClick={() =>
+                      scrollToVehicle(index)
+                    }
+                    aria-label={`Bekijk ${vehicle.name}`}
+                    className={`carousel-dot ${
+                      activeVehicle === index
+                        ? "active"
+                        : ""
+                    }`}
+                  />
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={nextVehicle}
+                aria-label="Volgende auto"
+                className="carousel-button"
+              >
+                →
+              </button>
+            </div>
+
+            <div className="carousel-caption">
+              <span>←</span>
+              Swipe om meer auto&apos;s te bekijken
+              <span>→</span>
+            </div>
+          </div>
         </div>
-      </article>
-    ))}
-  </div>
-
-  {/* CONTROLS */}
-  <div className="carousel-controls">
-    <button
-      type="button"
-      onClick={previousVehicle}
-      aria-label="Vorige auto"
-      className="carousel-button"
-    >
-      ←
-    </button>
-
-    <div className="carousel-dots">
-      {vehicles.map((vehicle, index) => (
-        <button
-          key={vehicle.name}
-          type="button"
-          onClick={() => scrollToVehicle(index)}
-          aria-label={`Bekijk ${vehicle.name}`}
-          className={`carousel-dot ${
-            activeVehicle === index ? "active" : ""
-          }`}
-        />
-      ))}
-    </div>
-
-    <button
-      type="button"
-      onClick={nextVehicle}
-      aria-label="Volgende auto"
-      className="carousel-button"
-    >
-      →
-    </button>
-  </div>
-
-  <div className="carousel-caption">
-    <span>←</span>
-    Swipe om meer auto&apos;s te bekijken
-    <span>→</span>
-  </div>
-</div>
+      </section>
 
       {/* =========================
           HOW IT WORKS
@@ -600,7 +589,6 @@ export default function Home() {
             className="application-form"
             action="/api/apply"
             method="post"
-            
           >
             <div className="form-row">
               <input
@@ -735,24 +723,35 @@ export default function Home() {
               FAQ
             </Link>
           </div>
-<div className="footer-column">
-  <small>BEDRIJF</small>
 
-  <span>Imperial Cabs B.V.</span>
-  <span>KVK: 99325330</span>
-  <span>Taxi Fleet Management</span>
-  <span>Amsterdam &amp; omgeving</span>
-  <span>info@imperialcabs.nl</span>
-  <span>+31 6 24562388</span>
+          <div className="footer-column">
+            <small>BEDRIJF</small>
 
-  <Link href="/privacybeleid">
-    Privacybeleid
-  </Link>
+            <span>
+              Imperial Cabs B.V.
+            </span>
 
-  <Link href="/algemene-voorwaarden">
-    Algemene voorwaarden
-  </Link>
-</div>
+            <span>
+              KVK: 99325330
+            </span>
+
+            <span>
+              Taxi Fleet Management
+            </span>
+
+            <span>
+              Amsterdam &amp; omgeving
+            </span>
+
+            <Link href="/privacybeleid">
+              Privacybeleid
+            </Link>
+
+            <Link href="/algemene-voorwaarden">
+              Algemene voorwaarden
+            </Link>
+          </div>
+
           <div className="footer-column">
             <small>CONTACT</small>
 
@@ -794,24 +793,16 @@ export default function Home() {
         .fleet-carousel {
           display: flex;
           gap: 20px;
-
           width: 100%;
-
           overflow-x: auto;
           overflow-y: hidden;
-
           scroll-snap-type: x mandatory;
           scroll-snap-stop: always;
-
           scrollbar-width: none;
-
           -webkit-overflow-scrolling: touch;
           scroll-behavior: smooth;
-
           overscroll-behavior-x: contain;
-
           touch-action: pan-x;
-
           padding: 5px 0 10px;
         }
 
@@ -822,42 +813,29 @@ export default function Home() {
         .vehicle-card {
           flex: 0 0 calc(100% - 76px);
           width: calc(100% - 76px);
-
           scroll-snap-align: start;
           scroll-snap-stop: always;
-
           background: #0c0c0c;
-
           border: 1px solid rgba(212, 175, 55, 0.28);
-
           overflow: hidden;
-
           border-radius: 2px;
-
           user-select: none;
         }
 
         .vehicle-image {
           width: 100%;
-
           aspect-ratio: 16 / 10;
-
           overflow: hidden;
-
           background: #111;
         }
 
         .vehicle-image img {
           display: block;
-
           width: 100%;
           height: 100%;
-
           object-fit: cover;
-
           user-select: none;
           -webkit-user-drag: none;
-
           transition: transform 0.5s ease;
         }
 
@@ -865,96 +843,28 @@ export default function Home() {
           transform: scale(1.025);
         }
 
-        .vehicle-info {
-          display: flex;
-
-          align-items: flex-end;
-
-          justify-content: space-between;
-
-          gap: 20px;
-
-          padding: 20px 22px 22px;
-        }
-
-        .vehicle-label {
-          display: block;
-
-          margin-bottom: 6px;
-
-          color: #777;
-
-          font-size: 9px;
-
-          font-weight: 700;
-
-          letter-spacing: 0.18em;
-        }
-
-        .vehicle-info h3 {
-          margin: 0;
-
-          color: #fff;
-
-          font-size: 23px;
-
-          line-height: 1.1;
-
-          letter-spacing: 0.01em;
-        }
-
-        .vehicle-electric {
-          flex-shrink: 0;
-
-          color: #c9a94a;
-
-          font-size: 9px;
-
-          font-weight: 800;
-
-          letter-spacing: 0.12em;
-
-          white-space: nowrap;
-        }
-
         .carousel-controls {
           display: flex;
-
           align-items: center;
-
           justify-content: center;
-
           gap: 24px;
-
           margin-top: 20px;
         }
 
         .carousel-button {
           display: flex;
-
           align-items: center;
-
           justify-content: center;
-
           width: 46px;
           height: 46px;
-
           padding: 0;
-
           border: 1px solid rgba(212, 175, 55, 0.45);
-
           border-radius: 50%;
-
           background: #0d0d0d;
-
           color: #c9a94a;
-
           font-size: 20px;
-
           line-height: 1;
-
           cursor: pointer;
-
           transition:
             transform 0.2s ease,
             background 0.2s ease,
@@ -964,11 +874,8 @@ export default function Home() {
 
         .carousel-button:hover {
           transform: translateY(-2px);
-
           background: #c9a94a;
-
           color: #080808;
-
           border-color: #c9a94a;
         }
 
@@ -978,26 +885,18 @@ export default function Home() {
 
         .carousel-dots {
           display: flex;
-
           align-items: center;
-
           gap: 8px;
         }
 
         .carousel-dot {
           width: 7px;
           height: 7px;
-
           padding: 0;
-
           border: 0;
-
           border-radius: 50%;
-
           background: #555;
-
           cursor: pointer;
-
           transition:
             width 0.2s ease,
             background 0.2s ease;
@@ -1005,35 +904,24 @@ export default function Home() {
 
         .carousel-dot.active {
           width: 24px;
-
           border-radius: 10px;
-
           background: #c9a94a;
         }
 
         .carousel-caption {
           display: flex;
-
           align-items: center;
-
           justify-content: center;
-
           gap: 10px;
-
           margin-top: 12px;
-
           color: #777;
-
           font-size: 10px;
-
           letter-spacing: 0.08em;
-
           text-transform: uppercase;
         }
 
         .carousel-caption span {
           color: #c9a94a;
-
           font-size: 16px;
         }
 
@@ -1051,22 +939,12 @@ export default function Home() {
         @media (max-width: 900px) {
           .fleet-carousel {
             gap: 14px;
-
             padding-right: 8%;
           }
 
           .vehicle-card {
             flex: 0 0 92%;
-
             width: 92%;
-          }
-
-          .vehicle-info {
-            flex-direction: column;
-
-            align-items: flex-start;
-
-            gap: 12px;
           }
         }
 
@@ -1077,20 +955,11 @@ export default function Home() {
 
           .vehicle-card {
             flex: 0 0 92%;
-
             width: 92%;
           }
 
           .vehicle-image {
             aspect-ratio: 4 / 3;
-          }
-
-          .vehicle-info {
-            padding: 17px 18px 19px;
-          }
-
-          .vehicle-info h3 {
-            font-size: 20px;
           }
 
           .carousel-controls {
@@ -1100,7 +969,6 @@ export default function Home() {
           .carousel-button {
             width: 40px;
             height: 40px;
-
             font-size: 18px;
           }
         }
