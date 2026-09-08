@@ -427,7 +427,7 @@ export default function Home() {
                     />
                   </div>
 
-                {vehicles.map((vehicle) => (
+             {vehicles.map((vehicle) => (
   <article
     className="vehicle-card"
     key={vehicle.name}
@@ -441,15 +441,6 @@ export default function Home() {
     </div>
   </article>
 ))}
-
-                    <span className="vehicle-electric">
-                      VOLLEDIG ELEKTRISCH
-                    </span>
-                  </div>
-                </article>
-              ))}
-            </div>
-
             {/* CONTROLS */}
             <div className="carousel-controls">
               <button
