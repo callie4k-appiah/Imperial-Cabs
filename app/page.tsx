@@ -415,19 +415,6 @@ export default function Home() {
               onScroll={handleScroll}
             >
               {vehicles.map((vehicle) => (
-                <article
-                  className="vehicle-card"
-                  key={vehicle.name}
-                >
-                  <div className="vehicle-image">
-                    <img
-                      src={vehicle.image}
-                      alt={`${vehicle.name} - Imperial Cabs`}
-                      draggable="false"
-                    />
-                  </div>
-
-             {vehicles.map((vehicle) => (
   <article
     className="vehicle-card"
     key={vehicle.name}
