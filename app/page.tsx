@@ -408,73 +408,72 @@ export default function Home() {
           {/* =========================
               IMPROVED VEHICLE CAROUSEL
           ========================== */}
-          <div className="fleet-carousel-wrapper">
-            <div
-              ref={carouselRef}
-              className="fleet-carousel"
-              onScroll={handleScroll}
-            >
-              {vehicles.map((vehicle) => (
-  <article
-    className="vehicle-card"
-    key={vehicle.name}
+         {/* =========================
+    IMPROVED VEHICLE CAROUSEL
+========================== */}
+<div className="fleet-carousel-wrapper">
+  <div
+    ref={carouselRef}
+    className="fleet-carousel"
+    onScroll={handleScroll}
   >
-    <div className="vehicle-image">
-      <img
-        src={vehicle.image}
-        alt={`${vehicle.name} - Imperial Cabs`}
-        draggable="false"
-      />
-    </div>
-  </article>
-))}
-            {/* CONTROLS */}
-            <div className="carousel-controls">
-              <button
-                type="button"
-                onClick={previousVehicle}
-                aria-label="Vorige auto"
-                className="carousel-button"
-              >
-                ←
-              </button>
-
-              <div className="carousel-dots">
-                {vehicles.map((vehicle, index) => (
-                  <button
-                    key={vehicle.name}
-                    type="button"
-                    onClick={() =>
-                      scrollToVehicle(index)
-                    }
-                    aria-label={`Bekijk ${vehicle.name}`}
-                    className={`carousel-dot ${
-                      activeVehicle === index
-                        ? "active"
-                        : ""
-                    }`}
-                  />
-                ))}
-              </div>
-
-              <button
-                type="button"
-                onClick={nextVehicle}
-                aria-label="Volgende auto"
-                className="carousel-button"
-              >
-                →
-              </button>
-            </div>
-
-            <div className="carousel-caption">
-              <span>←</span>
-              Swipe om meer auto&apos;s te bekijken
-              <span>→</span>
-            </div>
-          </div>
+    {vehicles.map((vehicle) => (
+      <article
+        className="vehicle-card"
+        key={vehicle.name}
+      >
+        <div className="vehicle-image">
+          <img
+            src={vehicle.image}
+            alt={`${vehicle.name} - Imperial Cabs`}
+            draggable="false"
+          />
         </div>
-      </section>
+      </article>
+    ))}
+  </div>
+
+  {/* CONTROLS */}
+  <div className="carousel-controls">
+    <button
+      type="button"
+      onClick={previousVehicle}
+      aria-label="Vorige auto"
+      className="carousel-button"
+    >
+      ←
+    </button>
+
+    <div className="carousel-dots">
+      {vehicles.map((vehicle, index) => (
+        <button
+          key={vehicle.name}
+          type="button"
+          onClick={() => scrollToVehicle(index)}
+          aria-label={`Bekijk ${vehicle.name}`}
+          className={`carousel-dot ${
+            activeVehicle === index ? "active" : ""
+          }`}
+        />
+      ))}
+    </div>
+
+    <button
+      type="button"
+      onClick={nextVehicle}
+      aria-label="Volgende auto"
+      className="carousel-button"
+    >
+      →
+    </button>
+  </div>
+
+  <div className="carousel-caption">
+    <span>←</span>
+    Swipe om meer auto&apos;s te bekijken
+    <span>→</span>
+  </div>
+</div>
 
       {/* =========================
           HOW IT WORKS
