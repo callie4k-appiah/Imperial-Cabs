@@ -427,13 +427,16 @@ export default function Home() {
                     />
                   </div>
 
-                 <div className="vehicle-card">
-  <img
-    src={vehicle.image}
-    alt={vehicle.name}
-    className="vehicle-image"
-  />
-</div>
+                key={vehicle.name}
+>
+  <div className="vehicle-image">
+    <img
+      src={vehicle.image}
+      alt={`${vehicle.name} - Imperial Cabs`}
+      draggable="false"
+    />
+  </div>
+</article>
 
                     <span className="vehicle-electric">
                       VOLLEDIG ELEKTRISCH
