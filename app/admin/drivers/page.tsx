@@ -50,8 +50,13 @@ export default function DriversPage() {
           <p>Beheer alle Imperial Cabs chauffeurs.</p>
         </div>
 
-        <button>+ Chauffeur toevoegen</button>
-      </div>
+        <button
+  onClick={() => {
+    window.location.href = "/admin/drivers/new";
+  }}
+>
+  + Chauffeur toevoegen
+</button>
 
       {loading ? (
         <p>Chauffeurs laden...</p>
