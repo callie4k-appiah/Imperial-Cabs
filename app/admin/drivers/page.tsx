@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "../../../lib/supabase";
 
 type Driver = {
@@ -13,6 +14,7 @@ type Driver = {
 };
 
 export default function DriversPage() {
+  const router = useRouter();
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -20,13 +22,13 @@ export default function DriversPage() {
     async function loadDrivers() {
       const { data, error } = await supabase
         .from("driver")
-        .select(
-          "id, full_name, phone, email, status, start_date"
-        )
+        .select("id, full_name, phone, email, status, start_date")
         .order("created_at", { ascending: false });
 
-      if (!error && data) {
-        setDrivers(data);
+      if (error) {
+        console.error("Error loading drivers:", error);
+      } else {
+        setDrivers(data || []);
       }
 
       setLoading(false);
@@ -36,7 +38,12 @@ export default function DriversPage() {
   }, []);
 
   return (
-    <main style={{ minHeight: "100vh", padding: "40px" }}>
+    <main
+      style={{
+        minHeight: "100vh",
+        padding: "40px",
+      }}
+    >
       <div
         style={{
           display: "flex",
@@ -51,12 +58,12 @@ export default function DriversPage() {
         </div>
 
         <button
-  onClick={() => {
-    window.location.href = "/admin/drivers/new";
-  }}
->
-  + Chauffeur toevoegen
-</button>
+          type="button"
+          onClick={() => router.push("/admin/drivers/new")}
+        >
+          + Chauffeur toevoegen
+        </button>
+      </div>
 
       {loading ? (
         <p>Chauffeurs laden...</p>
@@ -64,8 +71,7 @@ export default function DriversPage() {
         <div>
           <h2>Nog geen chauffeurs</h2>
           <p>
-            Zodra je chauffeurs toevoegt, verschijnen ze
-            hier.
+            Zodra je chauffeurs toevoegt, verschijnen ze hier.
           </p>
         </div>
       ) : (
@@ -81,13 +87,22 @@ export default function DriversPage() {
               }}
             >
               <h3>{driver.full_name}</h3>
-              <p>{driver.phone}</p>
-              <p>{driver.email}</p>
-              <p>Status: {driver.status}</p>
+
+              <p>
+                <strong>Telefoon:</strong> {driver.phone}
+              </p>
+
+              <p>
+                <strong>E-mail:</strong> {driver.email}
+              </p>
+
+              <p>
+                <strong>Status:</strong> {driver.status}
+              </p>
 
               {driver.start_date && (
                 <p>
-                  Startdatum: {driver.start_date}
+                  <strong>Startdatum:</strong> {driver.start_date}
                 </p>
               )}
             </div>
