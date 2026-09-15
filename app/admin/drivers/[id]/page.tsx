@@ -12,7 +12,6 @@ type Driver = {
   status: string;
   start_date: string | null;
   chauffeurskaart_number: string | null;
-  created_at: string;
 };
 
 type Vehicle = {
@@ -27,87 +26,238 @@ type Vehicle = {
 export default function DriverDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const driverId = params.id as string;
+
+  const rawId = params?.id;
+  const driverId = Array.isArray(rawId) ? rawId[0] : rawId;
 
   const [driver, setDriver] = useState<Driver | null>(null);
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
+
   const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     async function loadDriver() {
       setLoading(true);
+      setErrorMessage("");
 
-      const { data: driverData, error: driverError } = await supabase
-        .from("driver")
-        .select(
-          "id, full_name, phone, email, status, start_date, chauffeurskaart_number, created_at"
-        )
-        .eq("id", driverId)
-        .single();
-
-      if (driverError) {
-        console.error("Error loading driver:", driverError);
+      if (!driverId) {
+        setErrorMessage("Geen chauffeur-ID gevonden in de URL.");
         setLoading(false);
         return;
       }
 
-      setDriver(driverData);
+      // Controleer login
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
 
-      const { data: vehicleData, error: vehicleError } = await supabase
-        .from("vehicle")
-        .select(
-          "id, brand, model, license_plate, year, status"
-        )
-        .eq("assigned_driver_id", driverId)
-        .maybeSingle();
-
-      if (vehicleError) {
-        console.error("Error loading vehicle:", vehicleError);
+      if (authError) {
+        console.error("Auth error:", authError);
+        setErrorMessage(
+          "Er is een probleem met de admin-login: " +
+            authError.message
+        );
+        setLoading(false);
+        return;
       }
 
-      setVehicle(vehicleData);
+      if (!user) {
+        router.push("/admin/login");
+        return;
+      }
+
+      console.log("Chauffeur ID:", driverId);
+      console.log("Admin:", user.email);
+
+      // Chauffeur ophalen
+      const { data: driverData, error: driverError } =
+        await supabase
+          .from("driver")
+          .select(
+            "id, full_name, phone, email, status, start_date, chauffeurskaart_number"
+          )
+          .eq("id", driverId)
+          .maybeSingle();
+
+      if (driverError) {
+        console.error("Driver error:", driverError);
+
+        setErrorMessage(
+          "Chauffeur kon niet worden geladen: " +
+            driverError.message
+        );
+
+        setLoading(false);
+        return;
+      }
+
+      if (!driverData) {
+        console.error(
+          "Geen chauffeur gevonden voor ID:",
+          driverId
+        );
+
+        setErrorMessage(
+          "Geen chauffeur gevonden met ID: " + driverId
+        );
+
+        setLoading(false);
+        return;
+      }
+
+      console.log("Chauffeur gevonden:", driverData);
+
+      setDriver(driverData);
+
+      // Gekoppeld voertuig ophalen
+      const { data: vehicleData, error: vehicleError } =
+        await supabase
+          .from("vehicle")
+          .select(
+            "id, brand, model, license_plate, year, status"
+          )
+          .eq("assigned_driver_id", driverId)
+          .maybeSingle();
+
+      if (vehicleError) {
+        console.error("Vehicle error:", vehicleError);
+      }
+
+      setVehicle(vehicleData || null);
 
       setLoading(false);
     }
 
-    if (driverId) {
-      loadDriver();
-    }
-  }, [driverId]);
+    loadDriver();
+  }, [driverId, router]);
 
+  // Laden
   if (loading) {
     return (
       <main
         style={{
           minHeight: "100vh",
+          background: "#050505",
+          color: "#fff",
           padding: "40px",
         }}
       >
-        <p>Chauffeur laden...</p>
+        <div
+          style={{
+            maxWidth: "1100px",
+            margin: "0 auto",
+          }}
+        >
+          <p style={{ color: "#aaa" }}>
+            Chauffeur laden...
+          </p>
+        </div>
       </main>
     );
   }
 
+  // Fout
+  if (errorMessage) {
+    return (
+      <main
+        style={{
+          minHeight: "100vh",
+          background: "#050505",
+          color: "#fff",
+          padding: "40px",
+        }}
+      >
+        <div
+          style={{
+            maxWidth: "1100px",
+            margin: "0 auto",
+          }}
+        >
+          <button
+            type="button"
+            onClick={() =>
+              router.push("/admin/drivers")
+            }
+            style={{
+              background: "#fff",
+              color: "#000",
+              border: "none",
+              borderRadius: "8px",
+              padding: "11px 17px",
+              cursor: "pointer",
+              fontWeight: 600,
+              marginBottom: "30px",
+            }}
+          >
+            ← Terug naar chauffeurs
+          </button>
+
+          <div
+            style={{
+              background: "#160909",
+              border: "1px solid #6b2525",
+              borderRadius: "14px",
+              padding: "25px",
+            }}
+          >
+            <h1 style={{ marginTop: 0 }}>
+              Chauffeur niet gevonden
+            </h1>
+
+            <p
+              style={{
+                color: "#ffb0b0",
+                lineHeight: 1.6,
+              }}
+            >
+              {errorMessage}
+            </p>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  // Chauffeur bestaat niet
   if (!driver) {
     return (
       <main
         style={{
           minHeight: "100vh",
+          background: "#050505",
+          color: "#fff",
           padding: "40px",
         }}
       >
-        <h1>Chauffeur niet gevonden</h1>
-
-        <button
-          onClick={() => router.push("/admin/drivers")}
+        <div
           style={{
-            marginTop: "20px",
-            padding: "12px 18px",
-            cursor: "pointer",
+            maxWidth: "1100px",
+            margin: "0 auto",
           }}
         >
-          ← Terug naar chauffeurs
-        </button>
+          <h1>Chauffeur niet gevonden</h1>
+
+          <button
+            type="button"
+            onClick={() =>
+              router.push("/admin/drivers")
+            }
+            style={{
+              marginTop: "20px",
+              background: "#fff",
+              color: "#000",
+              border: "none",
+              borderRadius: "8px",
+              padding: "12px 18px",
+              cursor: "pointer",
+              fontWeight: 600,
+            }}
+          >
+            ← Terug naar chauffeurs
+          </button>
+        </div>
       </main>
     );
   }
@@ -116,8 +266,9 @@ export default function DriverDetailPage() {
     <main
       style={{
         minHeight: "100vh",
+        background: "#050505",
+        color: "#fff",
         padding: "40px",
-        background: "#f7f5f0",
       }}
     >
       <div
@@ -126,53 +277,71 @@ export default function DriverDetailPage() {
           margin: "0 auto",
         }}
       >
+        {/* Terug */}
         <button
-          onClick={() => router.push("/admin/drivers")}
+          type="button"
+          onClick={() =>
+            router.push("/admin/drivers")
+          }
           style={{
-            marginBottom: "25px",
-            padding: "10px 16px",
+            background: "#fff",
+            color: "#000",
+            border: "none",
+            borderRadius: "8px",
+            padding: "11px 17px",
             cursor: "pointer",
+            fontWeight: 600,
+            marginBottom: "30px",
           }}
         >
           ← Terug naar chauffeurs
         </button>
 
+        {/* Header */}
         <div
           style={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            marginBottom: "30px",
+            gap: "20px",
+            marginBottom: "35px",
           }}
         >
           <div>
             <h1
               style={{
-                fontSize: "32px",
-                marginBottom: "8px",
+                margin: 0,
+                fontSize: "36px",
               }}
             >
               {driver.full_name}
             </h1>
 
-            <p style={{ color: "#666" }}>
+            <p
+              style={{
+                color: "#999",
+                marginTop: "8px",
+              }}
+            >
               Chauffeurprofiel · Imperial Cabs
             </p>
           </div>
 
-          <div
+          <span
             style={{
+              background: "#fff",
+              color: "#000",
               padding: "8px 14px",
               borderRadius: "20px",
-              background: "#111",
-              color: "#fff",
+              fontWeight: 600,
               fontSize: "14px",
             }}
           >
             {driver.status}
-          </div>
+          </span>
         </div>
 
+        {/* Cards */}
         <div
           style={{
             display: "grid",
@@ -184,54 +353,57 @@ export default function DriverDetailPage() {
           {/* Persoonsgegevens */}
           <section
             style={{
-              background: "#fff",
-              padding: "25px",
+              background: "#0b0b0b",
+              border: "1px solid #222",
               borderRadius: "14px",
-              border: "1px solid #ddd",
+              padding: "25px",
             }}
           >
             <h2>Persoonsgegevens</h2>
 
             <p>
-              <strong>Naam:</strong> {driver.full_name}
+              <strong>Naam:</strong>{" "}
+              {driver.full_name}
             </p>
 
             <p>
-              <strong>Telefoon:</strong> {driver.phone}
+              <strong>Telefoon:</strong>{" "}
+              {driver.phone}
             </p>
 
             <p>
-              <strong>E-mail:</strong> {driver.email}
+              <strong>E-mail:</strong>{" "}
+              {driver.email}
             </p>
 
             <p>
               <strong>Startdatum:</strong>{" "}
-              {driver.start_date || "Nog niet ingevuld"}
+              {driver.start_date || "Niet ingevuld"}
             </p>
 
             <p>
               <strong>Chauffeurskaart:</strong>{" "}
               {driver.chauffeurskaart_number ||
-                "Nog niet ingevuld"}
+                "Niet ingevuld"}
             </p>
           </section>
 
           {/* Voertuig */}
           <section
             style={{
-              background: "#fff",
-              padding: "25px",
+              background: "#0b0b0b",
+              border: "1px solid #222",
               borderRadius: "14px",
-              border: "1px solid #ddd",
+              padding: "25px",
             }}
           >
-            <h2>Gekoppeld voertuig</h2>
+            <h2>Voertuig</h2>
 
             {vehicle ? (
               <>
                 <p>
-                  <strong>Auto:</strong> {vehicle.brand}{" "}
-                  {vehicle.model}
+                  <strong>Auto:</strong>{" "}
+                  {vehicle.brand} {vehicle.model}
                 </p>
 
                 <p>
@@ -241,98 +413,118 @@ export default function DriverDetailPage() {
 
                 <p>
                   <strong>Bouwjaar:</strong>{" "}
-                  {vehicle.year || "Onbekend"}
+                  {vehicle.year || "Niet bekend"}
                 </p>
 
                 <p>
-                  <strong>Status:</strong> {vehicle.status}
+                  <strong>Status:</strong>{" "}
+                  {vehicle.status}
                 </p>
               </>
             ) : (
-              <p>Deze chauffeur heeft nog geen voertuig.</p>
+              <p style={{ color: "#999" }}>
+                Nog geen voertuig gekoppeld.
+              </p>
             )}
           </section>
 
           {/* Documenten */}
           <section
             style={{
-              background: "#fff",
-              padding: "25px",
+              background: "#0b0b0b",
+              border: "1px solid #222",
               borderRadius: "14px",
-              border: "1px solid #ddd",
+              padding: "25px",
             }}
           >
             <h2>Documenten</h2>
-            <p>Documenten beheren komt hier.</p>
+
+            <p style={{ color: "#999" }}>
+              Documenten beheren.
+            </p>
           </section>
 
           {/* Betalingen */}
           <section
             style={{
-              background: "#fff",
-              padding: "25px",
+              background: "#0b0b0b",
+              border: "1px solid #222",
               borderRadius: "14px",
-              border: "1px solid #ddd",
+              padding: "25px",
             }}
           >
             <h2>Betalingen</h2>
-            <p>Betalingen en openstaande bedragen komen hier.</p>
+
+            <p style={{ color: "#999" }}>
+              Betalingen en openstaande bedragen.
+            </p>
           </section>
 
           {/* Schade */}
           <section
             style={{
-              background: "#fff",
-              padding: "25px",
+              background: "#0b0b0b",
+              border: "1px solid #222",
               borderRadius: "14px",
-              border: "1px solid #ddd",
+              padding: "25px",
             }}
           >
             <h2>Schademeldingen</h2>
-            <p>Schademeldingen komen hier.</p>
+
+            <p style={{ color: "#999" }}>
+              Schades van deze chauffeur.
+            </p>
           </section>
 
           {/* Onderhoud */}
           <section
             style={{
-              background: "#fff",
-              padding: "25px",
+              background: "#0b0b0b",
+              border: "1px solid #222",
               borderRadius: "14px",
-              border: "1px solid #ddd",
+              padding: "25px",
             }}
           >
             <h2>Onderhoud</h2>
-            <p>Onderhoud en reparaties komen hier.</p>
+
+            <p style={{ color: "#999" }}>
+              Onderhoud en reparaties.
+            </p>
           </section>
 
           {/* Contract */}
           <section
             style={{
-              background: "#fff",
-              padding: "25px",
+              background: "#0b0b0b",
+              border: "1px solid #222",
               borderRadius: "14px",
-              border: "1px solid #ddd",
+              padding: "25px",
             }}
           >
             <h2>Contract</h2>
-            <p>Contractgegevens komen hier.</p>
+
+            <p style={{ color: "#999" }}>
+              Contractgegevens.
+            </p>
           </section>
 
           {/* Berichten */}
           <section
             style={{
-              background: "#fff",
-              padding: "25px",
+              background: "#0b0b0b",
+              border: "1px solid #222",
               borderRadius: "14px",
-              border: "1px solid #ddd",
+              padding: "25px",
             }}
           >
             <h2>Berichten</h2>
-            <p>Communicatie met deze chauffeur komt hier.</p>
+
+            <p style={{ color: "#999" }}>
+              Communicatie met deze chauffeur.
+            </p>
           </section>
         </div>
       </div>
     </main>
   );
 }
-
