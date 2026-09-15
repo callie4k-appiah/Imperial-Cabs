@@ -6,10 +6,19 @@ import { supabase } from "../../lib/supabase";
 
 export default function AdminDashboard() {
   const router = useRouter();
+
   const [email, setEmail] = useState("");
+  const [stats, setStats] = useState({
+    drivers: 0,
+    vehicles: 0,
+    applications: 0,
+    payments: 0,
+    damages: 0,
+    maintenance: 0,
+  });
 
   useEffect(() => {
-    async function checkUser() {
+    async function loadDashboard() {
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -20,9 +29,40 @@ export default function AdminDashboard() {
       }
 
       setEmail(user.email || "");
+
+      const [
+        drivers,
+        vehicles,
+        applications,
+        payments,
+        damages,
+        maintenance,
+      ] = await Promise.all([
+        supabase.from("driver").select("*", { count: "exact", head: true }),
+        supabase.from("vehicle").select("*", { count: "exact", head: true }),
+        supabase
+          .from("applications")
+          .select("*", { count: "exact", head: true }),
+        supabase.from("payments").select("*", { count: "exact", head: true }),
+        supabase
+          .from("damage_reports")
+          .select("*", { count: "exact", head: true }),
+        supabase
+          .from("maintenance")
+          .select("*", { count: "exact", head: true }),
+      ]);
+
+      setStats({
+        drivers: drivers.count || 0,
+        vehicles: vehicles.count || 0,
+        applications: applications.count || 0,
+        payments: payments.count || 0,
+        damages: damages.count || 0,
+        maintenance: maintenance.count || 0,
+      });
     }
 
-    checkUser();
+    loadDashboard();
   }, [router]);
 
   async function logout() {
@@ -65,32 +105,32 @@ export default function AdminDashboard() {
         >
           <div>
             <h3>Chauffeurs</h3>
-            <p>0</p>
+            <p>{stats.drivers}</p>
           </div>
 
           <div>
             <h3>Voertuigen</h3>
-            <p>0</p>
+            <p>{stats.vehicles}</p>
           </div>
 
           <div>
             <h3>Nieuwe aanvragen</h3>
-            <p>0</p>
+            <p>{stats.applications}</p>
           </div>
 
           <div>
             <h3>Open betalingen</h3>
-            <p>0</p>
+            <p>{stats.payments}</p>
           </div>
 
           <div>
             <h3>Open schades</h3>
-            <p>0</p>
+            <p>{stats.damages}</p>
           </div>
 
           <div>
             <h3>Onderhoud</h3>
-            <p>0</p>
+            <p>{stats.maintenance}</p>
           </div>
         </div>
       </section>
