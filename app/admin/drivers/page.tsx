@@ -25,7 +25,7 @@ export default function DriversPage() {
       setLoading(true);
       setErrorMessage("");
 
-      // Controleer eerst of de admin ingelogd is
+      // Controleer of de admin is ingelogd
       const {
         data: { user },
         error: authError,
@@ -48,15 +48,16 @@ export default function DriversPage() {
         .from("driver")
         .select(
           "id, full_name, phone, email, status, start_date"
-        )
-        .order("created_at", { ascending: false });
+        );
 
       if (error) {
         console.error("Driver error:", error);
+
         setErrorMessage(
           "Chauffeurs konden niet worden geladen: " +
             error.message
         );
+
         setLoading(false);
         return;
       }
@@ -85,7 +86,7 @@ export default function DriversPage() {
           margin: "0 auto",
         }}
       >
-        {/* Header */}
+        {/* HEADER */}
         <div
           style={{
             display: "flex",
@@ -136,7 +137,7 @@ export default function DriversPage() {
           </button>
         </div>
 
-        {/* Error */}
+        {/* ERROR */}
         {errorMessage && (
           <div
             style={{
@@ -152,7 +153,7 @@ export default function DriversPage() {
           </div>
         )}
 
-        {/* Loading */}
+        {/* LOADING */}
         {loading ? (
           <div
             style={{
@@ -163,7 +164,7 @@ export default function DriversPage() {
             Chauffeurs laden...
           </div>
         ) : drivers.length === 0 ? (
-          /* Empty state */
+          /* GEEN CHAUFFEURS */
           <div
             style={{
               border: "1px solid #222222",
@@ -210,7 +211,7 @@ export default function DriversPage() {
             </button>
           </div>
         ) : (
-          /* Drivers */
+          /* CHAUFFEURS */
           <div
             style={{
               display: "grid",
