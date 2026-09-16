@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
-import { supabase } from "../../../lib/supabase";
+import { createClient } from "@supabase/supabase-js";
 
 function escapeHtml(value: string) {
   return value
@@ -21,7 +21,6 @@ export async function POST(request: Request) {
     const ervaring = String(formData.get("ervaring") || "").trim();
     const bericht = String(formData.get("bericht") || "").trim();
 
-    // Controleer verplichte velden
     if (!naam || !telefoon || !email || !ervaring || !bericht) {
       return NextResponse.json(
         {
@@ -31,7 +30,24 @@ export async function POST(request: Request) {
       );
     }
 
-    // 1. Aanvraag opslaan in Supabase
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey =
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+
+    if (!supabaseUrl || !supabaseKey) {
+      return NextResponse.json(
+        {
+          error: "Supabase configuratie ontbreekt.",
+        },
+        { status: 500 }
+      );
+    }
+
+    const supabase = createClient(
+      supabaseUrl,
+      supabaseKey
+    );
+
     const { error: databaseError } = await supabase
       .from("applications")
       .insert({
@@ -44,45 +60,35 @@ export async function POST(request: Request) {
       });
 
     if (databaseError) {
-      console.error("Supabase application error:", databaseError);
+      console.error("SUPABASE ERROR:", databaseError);
 
       return NextResponse.json(
         {
           error:
-            "De aanvraag kon niet worden opgeslagen. Probeer het opnieuw.",
+            "Aanvraag kon niet worden opgeslagen: " +
+            databaseError.message,
         },
         { status: 500 }
       );
     }
 
-    // 2. E-mail versturen via Resend
     const resendApiKey = process.env.RESEND_API_KEY;
 
-    if (!resendApiKey) {
-      console.error("RESEND_API_KEY ontbreekt.");
-      return NextResponse.json(
-        {
-          error: "E-mailservice is niet ingesteld.",
-        },
-        { status: 500 }
-      );
-    }
+    if (resendApiKey) {
+      const resend = new Resend(resendApiKey);
 
-    const resend = new Resend(resendApiKey);
+      const safeNaam = escapeHtml(naam);
+      const safeTelefoon = escapeHtml(telefoon);
+      const safeEmail = escapeHtml(email);
+      const safeErvaring = escapeHtml(ervaring);
+      const safeBericht = escapeHtml(bericht);
 
-    const safeNaam = escapeHtml(naam);
-    const safeTelefoon = escapeHtml(telefoon);
-    const safeEmail = escapeHtml(email);
-    const safeErvaring = escapeHtml(ervaring);
-    const safeBericht = escapeHtml(bericht);
-
-    const { error: emailError } = await resend.emails.send({
-      from: "Imperial Cabs <info@imperialcabs.nl>",
-      to: ["info@imperialcabs.nl"],
-      replyTo: email,
-      subject: `Nieuwe chauffeur-aanvraag: ${naam}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+      const { error: emailError } = await resend.emails.send({
+        from: "Imperial Cabs <info@imperialcabs.nl>",
+        to: ["info@imperialcabs.nl"],
+        replyTo: email,
+        subject: `Nieuwe chauffeur-aanvraag: ${naam}`,
+        html: `
           <h2>Nieuwe chauffeur-aanvraag</h2>
 
           <p><strong>Naam:</strong> ${safeNaam}</p>
@@ -92,35 +98,26 @@ export async function POST(request: Request) {
 
           <h3>Bericht</h3>
           <p>${safeBericht}</p>
+        `,
+      });
 
-          <hr />
-
-          <p>
-            Deze aanvraag is automatisch opgeslagen in het
-            Imperial Cabs Admin Dashboard.
-          </p>
-        </div>
-      `,
-    });
-
-    if (emailError) {
-      console.error("Resend error:", emailError);
-
-      // De aanvraag staat al in Supabase.
-      // We geven toch een succesvolle redirect,
-      // zodat de chauffeur niet opnieuw hoeft in te dienen.
+      if (emailError) {
+        console.error("RESEND ERROR:", emailError);
+      }
     }
 
-    // 3. Naar bedankpagina
     return NextResponse.redirect(
-      new URL("/bedankt", request.url)
+      new URL("/bedankt", request.url),
+      303
     );
+
   } catch (error) {
-    console.error("Application error:", error);
+    console.error("APPLICATION ERROR:", error);
 
     return NextResponse.json(
       {
-        error: "Er is iets misgegaan. Probeer het opnieuw.",
+        error:
+          "Er is een onverwachte fout opgetreden bij het verwerken van je aanvraag.",
       },
       { status: 500 }
     );
