@@ -7,6 +7,7 @@ import { supabase } from "../../../lib/supabase";
 type Driver = {
   id: string;
   full_name: string;
+  phone: string | null;
 };
 
 type Vehicle = {
@@ -18,13 +19,13 @@ type Vehicle = {
 
 type DamageReport = {
   id: string;
-  driver_id: string | null;
+  driver_id: string;
   vehicle_id: string | null;
   description: string;
   damage_date: string;
   location: string | null;
-  photo_url: string | null;
   status: string;
+  photo_url: string | null;
   created_at: string;
 };
 
@@ -35,7 +36,6 @@ export default function DamageReportsPage() {
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     async function loadData() {
@@ -50,8 +50,8 @@ export default function DamageReportsPage() {
 
       const [
         { data: damageData, error: damageError },
-        { data: driverData },
-        { data: vehicleData },
+        { data: driverData, error: driverError },
+        { data: vehicleData, error: vehicleError },
       ] = await Promise.all([
         supabase
           .from("damage_reports")
@@ -60,21 +60,23 @@ export default function DamageReportsPage() {
 
         supabase
           .from("driver")
-          .select("id, full_name")
-          .order("full_name"),
+          .select("id, full_name, phone"),
 
         supabase
           .from("vehicle")
-          .select("id, brand, model, license_plate")
-          .order("brand"),
+          .select("id, brand, model, license_plate"),
       ]);
 
       if (damageError) {
-        console.error("Damage reports error:", damageError);
-        setErrorMessage(
-          "Schademeldingen konden niet worden geladen: " +
-            damageError.message
-        );
+        console.error("Damage error:", damageError);
+      }
+
+      if (driverError) {
+        console.error("Driver error:", driverError);
+      }
+
+      if (vehicleError) {
+        console.error("Vehicle error:", vehicleError);
       }
 
       setReports(damageData || []);
@@ -86,439 +88,612 @@ export default function DamageReportsPage() {
     loadData();
   }, [router]);
 
-  function getDriverName(id: string | null) {
-    if (!id) return "Geen chauffeur";
-
-    const driver = drivers.find(
-      (item) => item.id === id
-    );
+  function getDriverName(driverId: string) {
+    const driver = drivers.find((item) => item.id === driverId);
 
     return driver?.full_name || "Onbekende chauffeur";
   }
 
-  function getVehicleName(id: string | null) {
-    if (!id) return "Geen voertuig";
+  function getDriverPhone(driverId: string) {
+    const driver = drivers.find((item) => item.id === driverId);
 
-    const vehicle = vehicles.find(
-      (item) => item.id === id
-    );
+    return driver?.phone || "";
+  }
 
-    if (!vehicle) return "Onbekend voertuig";
+  function getVehicle(vehicleId: string | null) {
+    if (!vehicleId) return null;
 
-    return `${vehicle.brand} ${vehicle.model} — ${vehicle.license_plate}`;
+    return vehicles.find((item) => item.id === vehicleId) || null;
   }
 
   function statusLabel(status: string) {
     switch (status) {
       case "open":
         return "Open";
-      case "in_progress":
+
+      case "in_review":
         return "In behandeling";
+
       case "resolved":
         return "Afgerond";
+
+      case "closed":
+        return "Gesloten";
+
       default:
-        return status;
+        return status || "Onbekend";
     }
   }
 
   function statusStyle(status: string) {
-    if (status === "open") {
-      return {
-        background: "#351414",
-        color: "#ff9f9f",
-        border: "1px solid #6b2525",
-      };
-    }
+    switch (status) {
+      case "open":
+        return "status open";
 
-    if (status === "in_progress") {
-      return {
-        background: "#33280f",
-        color: "#f2ca63",
-        border: "1px solid #66501c",
-      };
-    }
+      case "in_review":
+        return "status review";
 
-    if (status === "resolved") {
-      return {
-        background: "#12331f",
-        color: "#82dda3",
-        border: "1px solid #245c39",
-      };
-    }
+      case "resolved":
+        return "status resolved";
 
-    return {
-      background: "#222",
-      color: "#ccc",
-      border: "1px solid #333",
-    };
+      case "closed":
+        return "status closed";
+
+      default:
+        return "status";
+    }
   }
 
-  function formatDate(date: string | null) {
-    if (!date) return "—";
-
-    return new Date(
-      `${date}T00:00:00`
-    ).toLocaleDateString("nl-NL");
+  function formatDate(date: string) {
+    return new Date(date).toLocaleDateString("nl-NL", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
   }
 
   if (loading) {
     return (
-      <main
-        style={{
-          minHeight: "100vh",
-          background: "#050505",
-          color: "#fff",
-          padding: "40px 20px",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: "1100px",
-            margin: "0 auto",
-          }}
-        >
-          <p style={{ color: "#999" }}>
-            Schademeldingen laden...
-          </p>
+      <main className="admin-page">
+        <div className="container">
+          <p>Schades laden...</p>
         </div>
       </main>
     );
   }
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        background: "#050505",
-        color: "#fff",
-        padding: "40px 20px",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "1100px",
-          margin: "0 auto",
-        }}
-      >
-        {/* TERUG */}
-
-        <button
-          type="button"
-          onClick={() => router.push("/admin")}
-          style={{
-            background: "transparent",
-            color: "#999",
-            border: "none",
-            padding: 0,
-            cursor: "pointer",
-            fontSize: "14px",
-            marginBottom: "20px",
-          }}
-        >
-          ← Terug naar dashboard
-        </button>
+    <main className="admin-page">
+      <div className="container">
 
         {/* HEADER */}
-
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            gap: "20px",
-            flexWrap: "wrap",
-            marginBottom: "30px",
-          }}
-        >
+        <div className="topbar">
           <div>
-            <h1
-              style={{
-                margin: 0,
-                fontSize: "36px",
-                fontWeight: 700,
-              }}
+            <button
+              className="back-button"
+              onClick={() => router.push("/admin")}
             >
-              Schades
-            </h1>
+              ← Dashboard
+            </button>
 
-            <p
-              style={{
-                color: "#888",
-                marginTop: "8px",
-              }}
-            >
-              Overzicht van alle schademeldingen.
+            <div className="eyebrow">
+              IMPERIAL CABS
+            </div>
+
+            <h1>Schades</h1>
+
+            <p>
+              Overzicht van alle gemelde voertuigschades.
             </p>
           </div>
 
           <button
-            type="button"
+            className="add-button"
             onClick={() =>
               router.push("/admin/damage-reports/new")
             }
-            style={{
-              background: "#d9a72f",
-              color: "#000",
-              border: "none",
-              borderRadius: "10px",
-              padding: "13px 18px",
-              cursor: "pointer",
-              fontWeight: 700,
-            }}
           >
             + Nieuwe schade
           </button>
         </div>
 
-        {/* ERROR */}
-
-        {errorMessage && (
-          <div
-            style={{
-              background: "#160909",
-              border: "1px solid #6b2525",
-              color: "#ffb0b0",
-              borderRadius: "12px",
-              padding: "15px",
-              marginBottom: "20px",
-            }}
-          >
-            {errorMessage}
-          </div>
-        )}
-
         {/* SUMMARY */}
-
-        <div
-          style={{
-            background: "#0b0b0b",
-            border: "1px solid #222",
-            borderRadius: "15px",
-            padding: "20px",
-            marginBottom: "25px",
-          }}
-        >
-          <div
-            style={{
-              color: "#888",
-              fontSize: "13px",
-              marginBottom: "6px",
-            }}
-          >
-            Totaal schademeldingen
+        <div className="summary">
+          <div className="summary-card">
+            <span>Totaal schades</span>
+            <strong>{reports.length}</strong>
           </div>
 
-          <div
-            style={{
-              fontSize: "30px",
-              fontWeight: 700,
-            }}
-          >
-            {reports.length}
+          <div className="summary-card">
+            <span>Open</span>
+            <strong>
+              {
+                reports.filter(
+                  (report) => report.status === "open"
+                ).length
+              }
+            </strong>
+          </div>
+
+          <div className="summary-card">
+            <span>In behandeling</span>
+            <strong>
+              {
+                reports.filter(
+                  (report) =>
+                    report.status === "in_review"
+                ).length
+              }
+            </strong>
+          </div>
+
+          <div className="summary-card">
+            <span>Afgerond</span>
+            <strong>
+              {
+                reports.filter(
+                  (report) =>
+                    report.status === "resolved" ||
+                    report.status === "closed"
+                ).length
+              }
+            </strong>
           </div>
         </div>
 
-        {/* EMPTY STATE */}
-
+        {/* REPORTS */}
         {reports.length === 0 ? (
-          <div
-            style={{
-              background: "#0b0b0b",
-              border: "1px solid #222",
-              borderRadius: "16px",
-              padding: "55px 25px",
-              textAlign: "center",
-            }}
-          >
-            <div
-              style={{
-                fontSize: "36px",
-                marginBottom: "15px",
-              }}
-            >
+          <div className="empty">
+            <div className="empty-icon">
               ✓
             </div>
 
-            <h2
-              style={{
-                margin: "0 0 8px",
-              }}
-            >
-              Geen schademeldingen
-            </h2>
+            <h2>Geen schades gevonden</h2>
 
-            <p
-              style={{
-                color: "#888",
-                marginBottom: "22px",
-              }}
-            >
-              Er zijn nog geen schades geregistreerd.
+            <p>
+              Er zijn momenteel geen
+              schademeldingen geregistreerd.
             </p>
 
             <button
-              type="button"
+              className="add-button"
               onClick={() =>
-                router.push("/admin/damage-reports/new")
+                router.push(
+                  "/admin/damage-reports/new"
+                )
               }
-              style={{
-                background: "#d9a72f",
-                color: "#000",
-                border: "none",
-                borderRadius: "9px",
-                padding: "12px 18px",
-                cursor: "pointer",
-                fontWeight: 700,
-              }}
             >
-              Eerste schade registreren
+              + Eerste schade toevoegen
             </button>
           </div>
         ) : (
-          <div
-            style={{
-              display: "grid",
-              gap: "15px",
-            }}
-          >
-            {reports.map((report) => (
-              <div
-                key={report.id}
-                style={{
-                  background: "#0b0b0b",
-                  border: "1px solid #222",
-                  borderRadius: "15px",
-                  padding: "22px",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
-                    gap: "20px",
-                    flexWrap: "wrap",
-                  }}
-                >
-                  <div style={{ flex: 1 }}>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "10px",
-                        flexWrap: "wrap",
-                        marginBottom: "12px",
-                      }}
-                    >
-                      <h2
-                        style={{
-                          margin: 0,
-                          fontSize: "19px",
-                        }}
-                      >
-                        {getVehicleName(
-                          report.vehicle_id
-                        )}
-                      </h2>
+          <div className="reports">
 
-                      <span
-                        style={{
-                          ...statusStyle(
-                            report.status
-                          ),
-                          padding: "5px 10px",
-                          borderRadius: "999px",
-                          fontSize: "12px",
-                          fontWeight: 700,
-                        }}
-                      >
-                        {statusLabel(
-                          report.status
-                        )}
-                      </span>
+            {reports.map((report) => {
+              const vehicle = getVehicle(
+                report.vehicle_id
+              );
+
+              return (
+                <button
+                  key={report.id}
+                  type="button"
+                  className="report-card"
+                  onClick={() =>
+                    router.push(
+                      `/admin/damage-reports/${report.id}`
+                    )
+                  }
+                >
+                  <div className="report-top">
+
+                    <div>
+                      <div className="vehicle-title">
+                        {vehicle
+                          ? `${vehicle.brand} ${vehicle.model}`
+                          : "Geen voertuig"}
+                      </div>
+
+                      {vehicle && (
+                        <div className="license-plate">
+                          {vehicle.license_plate}
+                        </div>
+                      )}
                     </div>
 
-                    <p
-                      style={{
-                        margin: "0 0 15px",
-                        color: "#ddd",
-                        lineHeight: 1.6,
-                      }}
+                    <span
+                      className={statusStyle(
+                        report.status
+                      )}
                     >
+                      {statusLabel(
+                        report.status
+                      )}
+                    </span>
+                  </div>
+
+                  <div className="divider" />
+
+                  <div className="report-info">
+
+                    <div className="info-item">
+                      <span>Chauffeur</span>
+
+                      <strong>
+                        {getDriverName(
+                          report.driver_id
+                        )}
+                      </strong>
+                    </div>
+
+                    <div className="info-item">
+                      <span>Datum</span>
+
+                      <strong>
+                        {formatDate(
+                          report.damage_date
+                        )}
+                      </strong>
+                    </div>
+
+                    <div className="info-item">
+                      <span>Locatie</span>
+
+                      <strong>
+                        {report.location ||
+                          "Niet opgegeven"}
+                      </strong>
+                    </div>
+
+                  </div>
+
+                  <div className="description">
+                    <span>Beschrijving</span>
+
+                    <p>
                       {report.description}
                     </p>
+                  </div>
 
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "18px",
-                        flexWrap: "wrap",
-                        color: "#888",
-                        fontSize: "13px",
-                      }}
-                    >
-                      <span>
-                        Chauffeur:{" "}
-                        <strong
-                          style={{ color: "#bbb" }}
-                        >
-                          {getDriverName(
+                  <div className="card-footer">
+                    <div className="driver-contact">
+                      {getDriverPhone(
+                        report.driver_id
+                      ) && (
+                        <>
+                          📞{" "}
+                          {getDriverPhone(
                             report.driver_id
                           )}
-                        </strong>
-                      </span>
-
-                      <span>
-                        Datum:{" "}
-                        <strong
-                          style={{ color: "#bbb" }}
-                        >
-                          {formatDate(
-                            report.damage_date
-                          )}
-                        </strong>
-                      </span>
-
-                      <span>
-                        Locatie:{" "}
-                        <strong
-                          style={{ color: "#bbb" }}
-                        >
-                          {report.location || "—"}
-                        </strong>
-                      </span>
+                        </>
+                      )}
                     </div>
 
-                    {report.photo_url && (
-                      <div
-                        style={{
-                          marginTop: "15px",
-                        }}
-                      >
-                        <a
-                          href={report.photo_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          onClick={(event) =>
-                            event.stopPropagation()
-                          }
-                          style={{
-                            color: "#d9a72f",
-                            textDecoration: "none",
-                            fontSize: "13px",
-                          }}
-                        >
-                          Foto bekijken →
-                        </a>
-                      </div>
-                    )}
+                    <div className="view-details">
+                      Bekijk details →
+                    </div>
                   </div>
-                </div>
-              </div>
-            ))}
+                </button>
+              );
+            })}
+
           </div>
         )}
       </div>
+
+      <style jsx>{`
+        .admin-page {
+          min-height: 100vh;
+          background: #f6f5f2;
+          padding: 40px 20px 80px;
+          color: #171717;
+        }
+
+        .container {
+          max-width: 1150px;
+          margin: 0 auto;
+        }
+
+        .topbar {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-end;
+          gap: 30px;
+          margin-bottom: 35px;
+        }
+
+        .back-button {
+          display: block;
+          border: none;
+          background: transparent;
+          padding: 0;
+          margin-bottom: 25px;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          color: #555;
+        }
+
+        .back-button:hover {
+          color: #000;
+        }
+
+        .eyebrow {
+          color: #b08a3e;
+          font-size: 12px;
+          font-weight: 800;
+          letter-spacing: 2px;
+          margin-bottom: 8px;
+        }
+
+        h1 {
+          margin: 0 0 8px;
+          font-size: 40px;
+          line-height: 1.1;
+        }
+
+        .topbar p {
+          margin: 0;
+          color: #777;
+        }
+
+        .add-button {
+          border: none;
+          background: #171717;
+          color: #d4af62;
+          padding: 13px 20px;
+          border-radius: 10px;
+          font-weight: 700;
+          cursor: pointer;
+          white-space: nowrap;
+        }
+
+        .add-button:hover {
+          background: #2a2a2a;
+        }
+
+        .summary {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 15px;
+          margin-bottom: 25px;
+        }
+
+        .summary-card {
+          background: white;
+          border: 1px solid #e7e4de;
+          border-radius: 15px;
+          padding: 20px;
+        }
+
+        .summary-card span {
+          display: block;
+          color: #888;
+          font-size: 13px;
+          margin-bottom: 8px;
+        }
+
+        .summary-card strong {
+          font-size: 27px;
+        }
+
+        .reports {
+          display: grid;
+          gap: 15px;
+        }
+
+        .report-card {
+          width: 100%;
+          text-align: left;
+          border: 1px solid #e7e4de;
+          background: white;
+          border-radius: 18px;
+          padding: 24px;
+          cursor: pointer;
+          color: #171717;
+          transition:
+            transform 0.15s ease,
+            box-shadow 0.15s ease,
+            border-color 0.15s ease;
+        }
+
+        .report-card:hover {
+          transform: translateY(-2px);
+          border-color: #c7a45a;
+          box-shadow: 0 10px 30px
+            rgba(0, 0, 0, 0.07);
+        }
+
+        .report-card:active {
+          transform: translateY(0);
+        }
+
+        .report-top {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          gap: 20px;
+        }
+
+        .vehicle-title {
+          font-size: 20px;
+          font-weight: 800;
+        }
+
+        .license-plate {
+          display: inline-block;
+          margin-top: 7px;
+          background: #f2f2f2;
+          border-radius: 6px;
+          padding: 5px 9px;
+          font-size: 12px;
+          font-weight: 800;
+          letter-spacing: 1px;
+        }
+
+        .status {
+          padding: 7px 12px;
+          border-radius: 999px;
+          background: #eee;
+          font-size: 12px;
+          font-weight: 800;
+          white-space: nowrap;
+        }
+
+        .status.open {
+          background: #fff0e8;
+          color: #9a4e24;
+        }
+
+        .status.review {
+          background: #fff7dd;
+          color: #8a6a20;
+        }
+
+        .status.resolved {
+          background: #e8f5ec;
+          color: #327044;
+        }
+
+        .status.closed {
+          background: #eeeeee;
+          color: #666;
+        }
+
+        .divider {
+          height: 1px;
+          background: #eeeeee;
+          margin: 20px 0;
+        }
+
+        .report-info {
+          display: grid;
+          grid-template-columns:
+            repeat(3, 1fr);
+          gap: 20px;
+        }
+
+        .info-item {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+
+        .info-item span,
+        .description span {
+          color: #999;
+          font-size: 11px;
+          text-transform: uppercase;
+          letter-spacing: 0.7px;
+          font-weight: 700;
+        }
+
+        .info-item strong {
+          font-size: 14px;
+        }
+
+        .description {
+          margin-top: 20px;
+        }
+
+        .description p {
+          margin: 7px 0 0;
+          color: #555;
+          font-size: 14px;
+          line-height: 1.5;
+        }
+
+        .card-footer {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-top: 22px;
+          padding-top: 17px;
+          border-top: 1px solid #eeeeee;
+        }
+
+        .driver-contact {
+          color: #777;
+          font-size: 13px;
+        }
+
+        .view-details {
+          color: #9b762f;
+          font-size: 13px;
+          font-weight: 800;
+        }
+
+        .empty {
+          background: white;
+          border: 1px solid #e7e4de;
+          border-radius: 18px;
+          padding: 70px 30px;
+          text-align: center;
+        }
+
+        .empty-icon {
+          width: 55px;
+          height: 55px;
+          margin: 0 auto 15px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          background: #f5f2eb;
+          color: #9b762f;
+          font-size: 24px;
+          font-weight: 800;
+        }
+
+        .empty h2 {
+          margin: 0 0 8px;
+        }
+
+        .empty p {
+          color: #888;
+          margin: 0 0 20px;
+        }
+
+        @media (max-width: 800px) {
+          .topbar {
+            flex-direction: column;
+            align-items: flex-start;
+          }
+
+          .summary {
+            grid-template-columns: 1fr 1fr;
+          }
+
+          .report-info {
+            grid-template-columns: 1fr;
+            gap: 15px;
+          }
+        }
+
+        @media (max-width: 500px) {
+          .admin-page {
+            padding: 25px 15px 60px;
+          }
+
+          h1 {
+            font-size: 32px;
+          }
+
+          .summary {
+            grid-template-columns: 1fr;
+          }
+
+          .report-top {
+            flex-direction: column;
+          }
+
+          .card-footer {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+          }
+        }
+      `}</style>
     </main>
   );
 }
