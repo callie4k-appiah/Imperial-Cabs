@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+import { supabase } from "../../../lib/supabase";
 
 function escapeHtml(value: string) {
   return value
@@ -12,178 +13,114 @@ function escapeHtml(value: string) {
 
 export async function POST(request: Request) {
   try {
-    const apiKey = process.env.RESEND_API_KEY;
-
-    if (!apiKey) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "RESEND_API_KEY ontbreekt in Vercel.",
-        },
-        { status: 500 }
-      );
-    }
-
-    const resend = new Resend(apiKey);
-
     const formData = await request.formData();
 
-    const naam = formData.get("naam")?.toString().trim() || "";
-    const telefoon = formData.get("telefoon")?.toString().trim() || "";
-    const email = formData.get("email")?.toString().trim() || "";
-    const ervaring = formData.get("ervaring")?.toString().trim() || "";
-    const bericht = formData.get("bericht")?.toString().trim() || "";
+    const naam = String(formData.get("naam") || "").trim();
+    const telefoon = String(formData.get("telefoon") || "").trim();
+    const email = String(formData.get("email") || "").trim();
+    const ervaring = String(formData.get("ervaring") || "").trim();
+    const bericht = String(formData.get("bericht") || "").trim();
 
-    if (!naam || !telefoon || !email) {
+    // Controleer verplichte velden
+    if (!naam || !telefoon || !email || !ervaring || !bericht) {
       return NextResponse.json(
         {
-          success: false,
-          message: "Vul alle verplichte velden in.",
+          error: "Vul alle verplichte velden in.",
         },
         { status: 400 }
       );
     }
 
-    const { error } = await resend.emails.send({
-      from: "Imperial Cabs <info@imperialcabs.nl>",
-      to: ["info@imperialcabs.nl"],
-      replyTo: email,
-      subject: `Nieuwe chauffeur aanvraag - ${naam}`,
+    // 1. Aanvraag opslaan in Supabase
+    const { error: databaseError } = await supabase
+      .from("applications")
+      .insert({
+        full_name: naam,
+        phone: telefoon,
+        email: email,
+        experience: ervaring,
+        message: bericht,
+        status: "new",
+      });
 
-      html: `
-        <!DOCTYPE html>
-        <html lang="nl">
-          <head>
-            <meta charset="UTF-8" />
-            <title>Nieuwe chauffeur aanvraag</title>
-          </head>
-
-          <body
-            style="
-              margin: 0;
-              padding: 40px 20px;
-              background: #f3f3f3;
-              font-family: Arial, Helvetica, sans-serif;
-              color: #111111;
-            "
-          >
-            <div
-              style="
-                max-width: 650px;
-                margin: 0 auto;
-                background: #ffffff;
-                padding: 40px;
-                border-radius: 8px;
-              "
-            >
-              <h1
-                style="
-                  margin: 0 0 10px;
-                  font-size: 26px;
-                "
-              >
-                Imperial <span style="color: #d4a63a;">Cabs</span>
-              </h1>
-
-              <p
-                style="
-                  margin: 0 0 30px;
-                  color: #777777;
-                  font-size: 14px;
-                "
-              >
-                Nieuwe chauffeur aanvraag
-              </p>
-
-              <hr
-                style="
-                  border: 0;
-                  border-top: 1px solid #eeeeee;
-                  margin-bottom: 30px;
-                "
-              />
-
-              <p>
-                <strong>Naam</strong><br />
-                ${escapeHtml(naam)}
-              </p>
-
-              <p>
-                <strong>Telefoonnummer</strong><br />
-                ${escapeHtml(telefoon)}
-              </p>
-
-              <p>
-                <strong>E-mailadres</strong><br />
-                ${escapeHtml(email)}
-              </p>
-
-              <p>
-                <strong>Taxi-ervaring</strong><br />
-                ${escapeHtml(ervaring || "Niet ingevuld")}
-              </p>
-
-              <p>
-                <strong>Bericht</strong><br />
-                ${
-                  bericht
-                    ? escapeHtml(bericht).replace(/\n/g, "<br />")
-                    : "Geen bericht ingevuld."
-                }
-              </p>
-
-              <hr
-                style="
-                  border: 0;
-                  border-top: 1px solid #eeeeee;
-                  margin: 30px 0;
-                "
-              />
-
-              <p
-                style="
-                  margin: 0;
-                  color: #888888;
-                  font-size: 12px;
-                "
-              >
-                Deze aanvraag is verstuurd via het chauffeurformulier
-                van Imperial Cabs.
-              </p>
-            </div>
-          </body>
-        </html>
-      `,
-    });
-
-    if (error) {
-      console.error("RESEND ERROR:", error);
+    if (databaseError) {
+      console.error("Supabase application error:", databaseError);
 
       return NextResponse.json(
         {
-          success: false,
-          message: "De aanvraag kon niet worden verzonden.",
-          error: error.message || "Onbekende Resend-fout.",
+          error:
+            "De aanvraag kon niet worden opgeslagen. Probeer het opnieuw.",
         },
         { status: 500 }
       );
     }
 
+    // 2. E-mail versturen via Resend
+    const resendApiKey = process.env.RESEND_API_KEY;
+
+    if (!resendApiKey) {
+      console.error("RESEND_API_KEY ontbreekt.");
+      return NextResponse.json(
+        {
+          error: "E-mailservice is niet ingesteld.",
+        },
+        { status: 500 }
+      );
+    }
+
+    const resend = new Resend(resendApiKey);
+
+    const safeNaam = escapeHtml(naam);
+    const safeTelefoon = escapeHtml(telefoon);
+    const safeEmail = escapeHtml(email);
+    const safeErvaring = escapeHtml(ervaring);
+    const safeBericht = escapeHtml(bericht);
+
+    const { error: emailError } = await resend.emails.send({
+      from: "Imperial Cabs <info@imperialcabs.nl>",
+      to: ["info@imperialcabs.nl"],
+      replyTo: email,
+      subject: `Nieuwe chauffeur-aanvraag: ${naam}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+          <h2>Nieuwe chauffeur-aanvraag</h2>
+
+          <p><strong>Naam:</strong> ${safeNaam}</p>
+          <p><strong>Telefoon:</strong> ${safeTelefoon}</p>
+          <p><strong>E-mail:</strong> ${safeEmail}</p>
+          <p><strong>Taxi-ervaring:</strong> ${safeErvaring}</p>
+
+          <h3>Bericht</h3>
+          <p>${safeBericht}</p>
+
+          <hr />
+
+          <p>
+            Deze aanvraag is automatisch opgeslagen in het
+            Imperial Cabs Admin Dashboard.
+          </p>
+        </div>
+      `,
+    });
+
+    if (emailError) {
+      console.error("Resend error:", emailError);
+
+      // De aanvraag staat al in Supabase.
+      // We geven toch een succesvolle redirect,
+      // zodat de chauffeur niet opnieuw hoeft in te dienen.
+    }
+
+    // 3. Naar bedankpagina
     return NextResponse.redirect(
-      new URL("/bedankt", request.url),
-      303
+      new URL("/bedankt", request.url)
     );
   } catch (error) {
-    console.error("APPLICATION ERROR:", error);
+    console.error("Application error:", error);
 
     return NextResponse.json(
       {
-        success: false,
-        message: "Er is iets misgegaan bij het versturen.",
-        error:
-          error instanceof Error
-            ? error.message
-            : "Onbekende fout.",
+        error: "Er is iets misgegaan. Probeer het opnieuw.",
       },
       { status: 500 }
     );
