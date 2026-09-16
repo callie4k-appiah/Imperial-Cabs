@@ -28,7 +28,7 @@ export default function VehiclePage() {
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    async function loadVehicles() {
+    async function loadData() {
       setLoading(true);
       setErrorMessage("");
 
@@ -42,15 +42,12 @@ export default function VehiclePage() {
         return;
       }
 
-      // Voertuigen ophalen
-      const {
-        data: vehicleData,
-        error: vehicleError,
-      } = await supabase
-        .from("vehicle")
-        .select(
-          "id, brand, model, license_plate, year, status, assigned_driver_id"
-        );
+      const { data: vehicleData, error: vehicleError } =
+        await supabase
+          .from("vehicle")
+          .select(
+            "id, brand, model, license_plate, year, status, assigned_driver_id"
+          );
 
       if (vehicleError) {
         console.error("Vehicle error:", vehicleError);
@@ -64,13 +61,10 @@ export default function VehiclePage() {
         return;
       }
 
-      // Chauffeurs ophalen
-      const {
-        data: driverData,
-        error: driverError,
-      } = await supabase
-        .from("driver")
-        .select("id, full_name");
+      const { data: driverData, error: driverError } =
+        await supabase
+          .from("driver")
+          .select("id, full_name");
 
       if (driverError) {
         console.error("Driver error:", driverError);
@@ -81,12 +75,10 @@ export default function VehiclePage() {
       setLoading(false);
     }
 
-    loadVehicles();
+    loadData();
   }, [router]);
 
-  function getDriverName(
-    driverId: string | null
-  ) {
+  function getDriverName(driverId: string | null) {
     if (!driverId) {
       return "Niet gekoppeld";
     }
@@ -95,9 +87,7 @@ export default function VehiclePage() {
       (item) => item.id === driverId
     );
 
-    return driver
-      ? driver.full_name
-      : "Onbekende chauffeur";
+    return driver?.full_name || "Onbekende chauffeur";
   }
 
   return (
@@ -122,6 +112,7 @@ export default function VehiclePage() {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
+            gap: "20px",
             marginBottom: "40px",
           }}
         >
@@ -225,6 +216,8 @@ export default function VehiclePage() {
             </button>
           </div>
         ) : (
+          /* VEHICLES */
+
           <div
             style={{
               display: "grid",
@@ -232,13 +225,23 @@ export default function VehiclePage() {
             }}
           >
             {vehicles.map((vehicle) => (
-              <div
+              <button
                 key={vehicle.id}
+                type="button"
+                onClick={() =>
+                  router.push(
+                    `/admin/vehicle/${vehicle.id}`
+                  )
+                }
                 style={{
+                  width: "100%",
+                  textAlign: "left",
                   background: "#0b0b0b",
+                  color: "#ffffff",
                   border: "1px solid #222222",
                   borderRadius: "14px",
                   padding: "25px",
+                  cursor: "pointer",
                 }}
               >
                 <div
@@ -256,8 +259,7 @@ export default function VehiclePage() {
                         fontSize: "24px",
                       }}
                     >
-                      {vehicle.brand}{" "}
-                      {vehicle.model}
+                      {vehicle.brand} {vehicle.model}
                     </h2>
 
                     <p
@@ -307,7 +309,18 @@ export default function VehiclePage() {
                     {vehicle.status}
                   </span>
                 </div>
-              </div>
+
+                <div
+                  style={{
+                    marginTop: "20px",
+                    color: "#d4af37",
+                    fontSize: "14px",
+                    fontWeight: 600,
+                  }}
+                >
+                  Voertuig bekijken →
+                </div>
+              </button>
             ))}
           </div>
         )}
