@@ -584,69 +584,68 @@ export default function Home() {
               </div>
             </div>
           </div>
+<form
+  className="application-form"
+  action="/api/apply"
+  method="post"
+>
+  <div className="form-row">
+    <input
+      type="text"
+      name="naam"
+      placeholder="Volledige naam"
+      required
+    />
 
-          <form
-            className="application-form"
-            action="/api/apply"
-            method="post"
-          >
-            <div className="form-row">
-              <input
-                type="text"
-                name="naam"
-                placeholder="Volledige naam"
-                required
-              />
+    <input
+      type="tel"
+      name="telefoon"
+      placeholder="Telefoonnummer"
+      required
+    />
+  </div>
 
-              <input
-                type="tel"
-                name="telefoon"
-                placeholder="Telefoonnummer"
-                required
-              />
-            </div>
+  <input
+    type="email"
+    name="email"
+    placeholder="E-mailadres"
+    required
+  />
 
-            <input
-              type="email"
-              name="email"
-              placeholder="E-mailadres"
-              required
-            />
+  <select
+    name="ervaring"
+    defaultValue=""
+    required
+  >
+    <option value="" disabled>
+      Heb je taxi-ervaring?
+    </option>
 
-            <select
-              name="ervaring"
-              defaultValue=""
-            >
-              <option
-                value=""
-                disabled
-              >
-                Heb je taxi-ervaring?
-              </option>
+    <option value="ja">
+      Ja
+    </option>
 
-              <option value="ja">
-                Ja
-              </option>
+    <option value="nee">
+      Nee
+    </option>
+  </select>
 
-              <option value="nee">
-                Nee
-              </option>
-            </select>
+  <textarea
+    name="bericht"
+    placeholder="Vertel ons kort iets over jezelf..."
+    required
+    minLength={10}
+  />
 
-            <textarea
-              name="bericht"
-              placeholder="Vertel ons kort iets over jezelf..."
-            />
+  <button type="submit">
+    Aanvraag versturen →
+  </button>
 
-            <button type="submit">
-              Aanvraag versturen →
-            </button>
-
-            <small>
-              Wij gebruiken je gegevens alleen om contact
-              met je op te nemen over je aanvraag.
-            </small>
-          </form>
+  <small>
+    Wij gebruiken je gegevens alleen om contact met je op te nemen
+    over je aanvraag.
+  </small>
+</form>
         </div>
       </section>
 
