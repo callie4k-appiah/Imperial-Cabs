@@ -28,8 +28,12 @@ export default function NewDamageReportPage() {
   const [description, setDescription] = useState("");
   const [damageDate, setDamageDate] = useState("");
   const [location, setLocation] = useState("");
-  const [photoUrl, setPhotoUrl] = useState("");
   const [status, setStatus] = useState("open");
+
+  const [photos, setPhotos] = useState<File[]>([]);
+  const [photoPreviews, setPhotoPreviews] = useState<string[]>(
+    []
+  );
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -98,6 +102,75 @@ export default function NewDamageReportPage() {
     }
   }
 
+  function handlePhotoChange(
+    event: React.ChangeEvent<HTMLInputElement>
+  ) {
+    const selectedFiles = Array.from(
+      event.target.files || []
+    );
+
+    if (selectedFiles.length === 0) return;
+
+    const remainingSlots = 5 - photos.length;
+
+    const filesToAdd = selectedFiles.slice(
+      0,
+      remainingSlots
+    );
+
+    const invalidFile = filesToAdd.find(
+      (file) => !file.type.startsWith("image/")
+    );
+
+    if (invalidFile) {
+      setErrorMessage(
+        "Alleen afbeeldingen kunnen worden geüpload."
+      );
+      return;
+    }
+
+    const tooLarge = filesToAdd.find(
+      (file) => file.size > 10 * 1024 * 1024
+    );
+
+    if (tooLarge) {
+      setErrorMessage(
+        "Een foto mag maximaal 10 MB zijn."
+      );
+      return;
+    }
+
+    setErrorMessage("");
+
+    setPhotos((current) => [
+      ...current,
+      ...filesToAdd,
+    ]);
+
+    const newPreviews = filesToAdd.map((file) =>
+      URL.createObjectURL(file)
+    );
+
+    setPhotoPreviews((current) => [
+      ...current,
+      ...newPreviews,
+    ]);
+
+    event.target.value = "";
+  }
+
+  function removePhoto(index: number) {
+    URL.revokeObjectURL(photoPreviews[index]);
+
+    setPhotos((current) =>
+      current.filter((_, i) => i !== index)
+    );
+
+    setPhotoPreviews((current) =>
+      current.filter((_, i) => i !== index)
+    );
+  }
+
   async function handleSubmit(
     event: React.FormEvent<HTMLFormElement>
   ) {
@@ -118,40 +191,99 @@ export default function NewDamageReportPage() {
     }
 
     if (!damageDate) {
-      setErrorMessage("Vul de datum van de schade in.");
+      setErrorMessage(
+        "Vul de datum van de schade in."
+      );
       return;
     }
 
     setSaving(true);
 
-    const { error } = await supabase
-      .from("damage_reports")
-      .insert({
-        driver_id: driverId,
-        vehicle_id: vehicleId || null,
-        description: description.trim(),
-        damage_date: damageDate,
-        location: location.trim() || null,
-        photo_url: photoUrl.trim() || null,
-        status,
-      });
+    try {
+      // 1. Schademelding opslaan
+      const { data: damageReport, error: damageError } =
+        await supabase
+          .from("damage_reports")
+          .insert({
+            driver_id: driverId,
+            vehicle_id: vehicleId || null,
+            description: description.trim(),
+            damage_date: damageDate,
+            location: location.trim() || null,
+            status,
+          })
+          .select("id")
+          .single();
 
-    if (error) {
-      console.error(
-        "Damage report insert error:",
-        error
-      );
+      if (damageError) {
+        throw new Error(
+          "Schade kon niet worden opgeslagen: " +
+            damageError.message
+        );
+      }
+
+      if (!damageReport) {
+        throw new Error(
+          "De schademelding kon niet worden aangemaakt."
+        );
+      }
+
+      // 2. Foto's uploaden
+      for (const photo of photos) {
+        const extension =
+          photo.name.split(".").pop() || "jpg";
+
+        const fileName =
+          `${crypto.randomUUID()}.${extension}`;
+
+        const filePath =
+          `${damageReport.id}/${fileName}`;
+
+        const { error: uploadError } =
+          await supabase.storage
+            .from("damage-photos")
+            .upload(filePath, photo, {
+              cacheControl: "3600",
+              upsert: false,
+              contentType: photo.type,
+            });
+
+        if (uploadError) {
+          throw new Error(
+            "Foto kon niet worden geüpload: " +
+              uploadError.message
+          );
+        }
+
+        // 3. Foto koppelen aan schademelding
+        const { error: photoRecordError } =
+          await supabase
+            .from("damage_photos")
+            .insert({
+              damage_report_id: damageReport.id,
+              file_path: filePath,
+            });
+
+        if (photoRecordError) {
+          throw new Error(
+            "Foto kon niet aan de schade worden gekoppeld: " +
+              photoRecordError.message
+          );
+        }
+      }
+
+      router.push("/admin/damage-reports");
+    } catch (error) {
+      console.error("Damage report error:", error);
 
       setErrorMessage(
-        "Schade kon niet worden opgeslagen: " +
-          error.message
+        error instanceof Error
+          ? error.message
+          : "Er ging iets mis bij het opslaan."
       );
 
       setSaving(false);
-      return;
     }
-
-    router.push("/admin/damage-reports");
   }
 
   if (loading) {
@@ -479,9 +611,9 @@ export default function NewDamageReportPage() {
             />
           </div>
 
-          {/* FOTO URL */}
+          {/* FOTO'S */}
 
-          <div style={{ marginBottom: "22px" }}>
+          <div style={{ marginBottom: "28px" }}>
             <label
               style={{
                 display: "block",
@@ -491,40 +623,140 @@ export default function NewDamageReportPage() {
                 fontWeight: 600,
               }}
             >
-              Foto URL
+              Foto's van de schade
             </label>
 
-            <input
-              type="url"
-              value={photoUrl}
-              onChange={(event) =>
-                setPhotoUrl(
-                  event.target.value
-                )
-              }
-              placeholder="https://..."
+            <div
               style={{
-                width: "100%",
-                boxSizing: "border-box",
-                background: "#151515",
-                color: "#fff",
-                border: "1px solid #333",
-                borderRadius: "9px",
-                padding: "13px",
-                fontSize: "15px",
-              }}
-            />
-
-            <small
-              style={{
-                display: "block",
-                color: "#777",
-                marginTop: "7px",
+                border: "1px dashed #444",
+                borderRadius: "12px",
+                padding: "25px",
+                textAlign: "center",
+                background: "#101010",
               }}
             >
-              Foto-upload naar Supabase Storage
-              voegen we later toe.
-            </small>
+              <div
+                style={{
+                  fontSize: "30px",
+                  marginBottom: "8px",
+                }}
+              >
+                📸
+              </div>
+
+              <p
+                style={{
+                  margin: "0 0 15px",
+                  color: "#999",
+                  fontSize: "14px",
+                }}
+              >
+                Voeg maximaal 5 foto's toe
+              </p>
+
+              <label
+                style={{
+                  display: "inline-block",
+                  background: "#222",
+                  color: "#fff",
+                  border: "1px solid #444",
+                  borderRadius: "9px",
+                  padding: "11px 16px",
+                  cursor:
+                    photos.length >= 5
+                      ? "not-allowed"
+                      : "pointer",
+                  fontWeight: 600,
+                  opacity:
+                    photos.length >= 5 ? 0.5 : 1,
+                }}
+              >
+                Foto's kiezen
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  disabled={photos.length >= 5}
+                  onChange={handlePhotoChange}
+                  style={{ display: "none" }}
+                />
+              </label>
+
+              <p
+                style={{
+                  margin: "12px 0 0",
+                  color: "#666",
+                  fontSize: "12px",
+                }}
+              >
+                JPG, PNG, WEBP · maximaal 10 MB per foto
+              </p>
+            </div>
+
+            {/* PREVIEWS */}
+
+            {photoPreviews.length > 0 && (
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns:
+                    "repeat(auto-fill, minmax(130px, 1fr))",
+                  gap: "12px",
+                  marginTop: "15px",
+                }}
+              >
+                {photoPreviews.map(
+                  (preview, index) => (
+                    <div
+                      key={preview}
+                      style={{
+                        position: "relative",
+                        borderRadius: "10px",
+                        overflow: "hidden",
+                        border: "1px solid #333",
+                        aspectRatio: "1",
+                        background: "#151515",
+                      }}
+                    >
+                      <img
+                        src={preview}
+                        alt={`Schade foto ${
+                          index + 1
+                        }`}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                      />
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          removePhoto(index)
+                        }
+                        style={{
+                          position: "absolute",
+                          top: "7px",
+                          right: "7px",
+                          width: "30px",
+                          height: "30px",
+                          borderRadius: "50%",
+                          border: "none",
+                          background:
+                            "rgba(0,0,0,0.75)",
+                          color: "#fff",
+                          cursor: "pointer",
+                          fontSize: "16px",
+                        }}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  )
+                )}
+              </div>
+            )}
           </div>
 
           {/* STATUS */}
@@ -596,7 +828,7 @@ export default function NewDamageReportPage() {
             }}
           >
             {saving
-              ? "Schade opslaan..."
+              ? "Schade + foto's opslaan..."
               : "Schade opslaan →"}
           </button>
         </form>
