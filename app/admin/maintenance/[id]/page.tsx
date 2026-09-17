@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { supabase } from "../../../../lib/supabase";
+import { useRouter } from "next/navigation";
+import { supabase } from "../../../lib/supabase";
 
 type Maintenance = {
   id: string;
@@ -20,7 +20,6 @@ type Driver = {
   id: string;
   full_name: string;
   phone: string | null;
-  email: string | null;
 };
 
 type Vehicle = {
@@ -28,33 +27,20 @@ type Vehicle = {
   brand: string;
   model: string;
   license_plate: string;
-  year: number | null;
-  status: string;
 };
 
-export default function MaintenanceDetailPage() {
-  const params = useParams();
+export default function MaintenancePage() {
   const router = useRouter();
 
-  const id = params.id as string;
-
-  const [maintenance, setMaintenance] =
-    useState<Maintenance | null>(null);
-  const [driver, setDriver] = useState<Driver | null>(null);
-  const [vehicle, setVehicle] = useState<Vehicle | null>(null);
-
-  const [status, setStatus] = useState("");
-  const [saving, setSaving] = useState(false);
+  const [maintenance, setMaintenance] = useState<
+    Maintenance[]
+  >([]);
+  const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!id) return;
-
-    async function loadMaintenance() {
-      setLoading(true);
-      setError("");
-
+    async function loadData() {
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -64,91 +50,71 @@ export default function MaintenanceDetailPage() {
         return;
       }
 
-      const {
-        data: maintenanceData,
-        error: maintenanceError,
-      } = await supabase
-        .from("maintenance")
-        .select("*")
-        .eq("id", id)
-        .single();
+      const [
+        { data: maintenanceData, error: maintenanceError },
+        { data: driverData, error: driverError },
+        { data: vehicleData, error: vehicleError },
+      ] = await Promise.all([
+        supabase
+          .from("maintenance")
+          .select("*")
+          .order("created_at", { ascending: false }),
 
-      if (maintenanceError || !maintenanceData) {
-        console.error(maintenanceError);
-        setError(
-          "Onderhoudsrecord kon niet worden gevonden."
-        );
-        setLoading(false);
-        return;
-      }
-
-      setMaintenance(maintenanceData);
-      setStatus(maintenanceData.status || "open");
-
-      if (maintenanceData.driver_id) {
-        const { data: driverData } = await supabase
+        supabase
           .from("driver")
-          .select(
-            "id, full_name, phone, email"
-          )
-          .eq("id", maintenanceData.driver_id)
-          .maybeSingle();
+          .select("id, full_name, phone"),
 
-        setDriver(driverData);
+        supabase
+          .from("vehicle")
+          .select("id, brand, model, license_plate"),
+      ]);
+
+      if (maintenanceError) {
+        console.error(
+          "Maintenance error:",
+          maintenanceError
+        );
       }
 
-      if (maintenanceData.vehicle_id) {
-        const { data: vehicleData } =
-          await supabase
-            .from("vehicle")
-            .select(
-              "id, brand, model, license_plate, year, status"
-            )
-            .eq("id", maintenanceData.vehicle_id)
-            .maybeSingle();
-
-        setVehicle(vehicleData);
+      if (driverError) {
+        console.error("Driver error:", driverError);
       }
 
+      if (vehicleError) {
+        console.error("Vehicle error:", vehicleError);
+      }
+
+      setMaintenance(maintenanceData || []);
+      setDrivers(driverData || []);
+      setVehicles(vehicleData || []);
       setLoading(false);
     }
 
-    loadMaintenance();
-  }, [id, router]);
+    loadData();
+  }, [router]);
 
-  async function updateStatus() {
-    if (!maintenance) return;
+  function getDriver(driverId: string | null) {
+    if (!driverId) return null;
 
-    setSaving(true);
-    setError("");
-
-    const { error: updateError } =
-      await supabase
-        .from("maintenance")
-        .update({
-          status,
-        })
-        .eq("id", maintenance.id);
-
-    if (updateError) {
-      console.error(updateError);
-      setError(
-        "Status kon niet worden opgeslagen."
-      );
-      setSaving(false);
-      return;
-    }
-
-    setMaintenance({
-      ...maintenance,
-      status,
-    });
-
-    setSaving(false);
+    return (
+      drivers.find(
+        (driver) => driver.id === driverId
+      ) || null
+    );
   }
 
-  function statusLabel(value: string) {
-    switch (value) {
+  function getVehicle(vehicleId: string | null) {
+    if (!vehicleId) return null;
+
+    return (
+      vehicles.find(
+        (vehicle) => vehicle.id === vehicleId
+      ) || null
+    );
+  }
+
+  function statusLabel(status: string) {
+    switch (status) {
       case "open":
         return "Open";
 
@@ -165,7 +131,29 @@ export default function MaintenanceDetailPage() {
         return "Geannuleerd";
 
       default:
-        return value || "Onbekend";
+        return status || "Onbekend";
+    }
+  }
+
+  function statusClass(status: string) {
+    switch (status) {
+      case "open":
+        return "status open";
+
+      case "planned":
+        return "status planned";
+
+      case "in_progress":
+        return "status progress";
+
+      case "completed":
+        return "status completed";
+
+      case "cancelled":
+        return "status cancelled";
+
+      default:
+        return "status";
     }
   }
 
@@ -192,76 +180,42 @@ export default function MaintenanceDetailPage() {
     );
   }
 
-  if (!maintenance) {
-    return (
-      <main className="admin-page">
-        <div className="container">
-          <button
-            className="back-button"
-            onClick={() =>
-              router.push("/admin/maintenance")
-            }
-          >
-            ← Terug naar onderhoud
-          </button>
+  const openCount = maintenance.filter(
+    (item) =>
+      item.status === "open"
+  ).length;
 
-          <div className="error-box">
-            {error ||
-              "Onderhoudsrecord niet gevonden."}
-          </div>
-        </div>
+  const plannedCount = maintenance.filter(
+    (item) =>
+      item.status === "planned"
+  ).length;
 
-        <style jsx>{`
-          .admin-page {
-            min-height: 100vh;
-            background: #f6f5f2;
-            padding: 40px 20px;
-            color: #171717;
-          }
+  const progressCount = maintenance.filter(
+    (item) =>
+      item.status === "in_progress"
+  ).length;
 
-          .container {
-            max-width: 1100px;
-            margin: 0 auto;
-          }
-
-          .back-button {
-            border: none;
-            background: transparent;
-            padding: 0;
-            margin-bottom: 25px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-          }
-
-          .error-box {
-            background: white;
-            border: 1px solid #e7e4de;
-            border-radius: 15px;
-            padding: 25px;
-          }
-        `}</style>
-      </main>
-    );
-  }
+  const completedCount = maintenance.filter(
+    (item) =>
+      item.status === "completed"
+  ).length;
 
   return (
     <main className="admin-page">
       <div className="container">
 
-        {/* BACK */}
-        <button
-          className="back-button"
-          onClick={() =>
-            router.push("/admin/maintenance")
-          }
-        >
-          ← Terug naar onderhoud
-        </button>
-
         {/* HEADER */}
-        <div className="page-header">
+        <div className="topbar">
           <div>
+            <button
+              className="back-button"
+              onClick={() =>
+                router.push("/admin")
+              }
+            >
+              ← Dashboard
+            </button>
+
             <div className="eyebrow">
               IMPERIAL CABS
             </div>
@@ -269,205 +223,213 @@ export default function MaintenanceDetailPage() {
             <h1>Onderhoud</h1>
 
             <p>
-              Details van deze
-              onderhoudsregistratie.
+              Beheer onderhoud en
+              onderhoudsafspraken van de vloot.
             </p>
           </div>
 
-          <div className="status-badge">
-            {statusLabel(
-              maintenance.status
-            )}
+          <button
+            className="add-button"
+            onClick={() =>
+              router.push(
+                "/admin/maintenance/new"
+              )
+            }
+          >
+            + Nieuw onderhoud
+          </button>
+        </div>
+
+        {/* SUMMARY */}
+        <div className="summary">
+          <div className="summary-card">
+            <span>Totaal</span>
+            <strong>
+              {maintenance.length}
+            </strong>
+          </div>
+
+          <div className="summary-card">
+            <span>Open</span>
+            <strong>{openCount}</strong>
+          </div>
+
+          <div className="summary-card">
+            <span>Gepland</span>
+            <strong>{plannedCount}</strong>
+          </div>
+
+          <div className="summary-card">
+            <span>Afgerond</span>
+            <strong>{completedCount}</strong>
           </div>
         </div>
 
-        {error && (
-          <div className="error-box">
-            {error}
+        {/* MAINTENANCE LIST */}
+        {maintenance.length === 0 ? (
+          <div className="empty">
+            <div className="empty-icon">
+              🔧
+            </div>
+
+            <h2>
+              Geen onderhoud gevonden
+            </h2>
+
+            <p>
+              Er zijn momenteel geen
+              onderhoudsregistraties.
+            </p>
+
+            <button
+              className="add-button"
+              onClick={() =>
+                router.push(
+                  "/admin/maintenance/new"
+                )
+              }
+            >
+              + Eerste onderhoud toevoegen
+            </button>
+          </div>
+        ) : (
+          <div className="maintenance-list">
+            {maintenance.map((item) => {
+              const driver = getDriver(
+                item.driver_id
+              );
+
+              const vehicle = getVehicle(
+                item.vehicle_id
+              );
+
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  className="maintenance-card"
+                  onClick={() =>
+                    router.push(
+                      `/admin/maintenance/${item.id}`
+                    )
+                  }
+                >
+                  {/* TOP */}
+                  <div className="card-top">
+                    <div className="title-section">
+                      <div className="maintenance-icon">
+                        🔧
+                      </div>
+
+                      <div>
+                        <h2>
+                          {item.maintenance_type ||
+                            "Onderhoud"}
+                        </h2>
+
+                        {vehicle ? (
+                          <div className="vehicle">
+                            {vehicle.brand}{" "}
+                            {vehicle.model}
+                          </div>
+                        ) : (
+                          <div className="vehicle muted">
+                            Geen voertuig gekoppeld
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <span
+                      className={statusClass(
+                        item.status
+                      )}
+                    >
+                      {statusLabel(
+                        item.status
+                      )}
+                    </span>
+                  </div>
+
+                  <div className="divider" />
+
+                  {/* INFO */}
+                  <div className="info-grid">
+
+                    <div className="info-item">
+                      <span>Voertuig</span>
+
+                      <strong>
+                        {vehicle
+                          ? vehicle.license_plate
+                          : "-"}
+                      </strong>
+                    </div>
+
+                    <div className="info-item">
+                      <span>Chauffeur</span>
+
+                      <strong>
+                        {driver
+                          ? driver.full_name
+                          : "Geen chauffeur"}
+                      </strong>
+                    </div>
+
+                    <div className="info-item">
+                      <span>Datum</span>
+
+                      <strong>
+                        {formatDate(
+                          item.maintenance_date
+                        )}
+                      </strong>
+                    </div>
+
+                  </div>
+
+                  {/* DESCRIPTION */}
+                  {item.description && (
+                    <div className="description">
+                      <span>
+                        Beschrijving
+                      </span>
+
+                      <p>
+                        {item.description}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* FOOTER */}
+                  <div className="card-footer">
+                    <div className="contact">
+                      {driver?.phone
+                        ? `📞 ${driver.phone}`
+                        : ""}
+                    </div>
+
+                    <div className="details">
+                      Bekijk details →
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         )}
 
-        <div className="grid">
-
-          {/* ONDERHOUD */}
-          <section className="card">
-            <div className="card-header">
-              <h2>Onderhoudsgegevens</h2>
-            </div>
-
-            <div className="info-grid">
-
-              <div>
-                <span>Type onderhoud</span>
-                <strong>
-                  {maintenance.maintenance_type ||
-                    "-"}
-                </strong>
-              </div>
-
-              <div>
-                <span>Datum</span>
-                <strong>
-                  {formatDate(
-                    maintenance.maintenance_date
-                  )}
-                </strong>
-              </div>
-
-              <div className="full">
-                <span>Beschrijving</span>
-
-                <strong className="description">
-                  {maintenance.description ||
-                    "Geen beschrijving toegevoegd."}
-                </strong>
-              </div>
-
-            </div>
-          </section>
-
-          {/* VOERTUIG */}
-          <section className="card">
-            <div className="card-header">
-              <h2>Voertuig</h2>
-            </div>
-
-            {vehicle ? (
-              <div className="vehicle-box">
-                <div className="vehicle-icon">
-                  🚗
-                </div>
-
-                <div>
-                  <strong>
-                    {vehicle.brand}{" "}
-                    {vehicle.model}
-                  </strong>
-
-                  <p>
-                    Kenteken:{" "}
-                    <b>
-                      {vehicle.license_plate}
-                    </b>
-                  </p>
-
-                  <p>
-                    Bouwjaar:{" "}
-                    {vehicle.year || "-"}
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <p className="muted">
-                Geen voertuig gekoppeld.
-              </p>
-            )}
-          </section>
-
-          {/* CHAUFFEUR */}
-          <section className="card">
-            <div className="card-header">
-              <h2>Chauffeur</h2>
-            </div>
-
-            {driver ? (
-              <div className="info-grid">
-
-                <div>
-                  <span>Naam</span>
-                  <strong>
-                    {driver.full_name}
-                  </strong>
-                </div>
-
-                <div>
-                  <span>Telefoon</span>
-                  <strong>
-                    {driver.phone || "-"}
-                  </strong>
-                </div>
-
-                <div className="full">
-                  <span>E-mail</span>
-                  <strong>
-                    {driver.email || "-"}
-                  </strong>
-                </div>
-
-              </div>
-            ) : (
-              <p className="muted">
-                Geen chauffeur gekoppeld.
-              </p>
-            )}
-          </section>
-
-          {/* STATUS */}
-          <section className="card">
-            <div className="card-header">
-              <h2>Status aanpassen</h2>
-            </div>
-
-            <div className="status-form">
-
-              <select
-                value={status}
-                onChange={(e) =>
-                  setStatus(e.target.value)
-                }
-              >
-                <option value="open">
-                  Open
-                </option>
-
-                <option value="planned">
-                  Gepland
-                </option>
-
-                <option value="in_progress">
-                  In behandeling
-                </option>
-
-                <option value="completed">
-                  Afgerond
-                </option>
-
-                <option value="cancelled">
-                  Geannuleerd
-                </option>
-              </select>
-
-              <button
-                onClick={updateStatus}
-                disabled={saving}
-              >
-                {saving
-                  ? "Opslaan..."
-                  : "Status opslaan"}
-              </button>
-
-            </div>
-          </section>
-
-        </div>
-
-        {/* NOTITIES */}
-        <section className="card notes-card">
-          <div className="card-header">
-            <h2>Notities</h2>
+        {/* EXTRA INFO */}
+        {maintenance.length > 0 && (
+          <div className="bottom-info">
+            <span>
+              {progressCount} onderhoudsitem
+              {progressCount === 1
+                ? ""
+                : "s"} in behandeling
+            </span>
           </div>
-
-          <div className="notes">
-            {maintenance.notes ? (
-              maintenance.notes
-            ) : (
-              <span className="muted">
-                Geen notities toegevoegd.
-              </span>
-            )}
-          </div>
-        </section>
-
+        )}
       </div>
 
       <style jsx>{`
@@ -479,31 +441,32 @@ export default function MaintenanceDetailPage() {
         }
 
         .container {
-          max-width: 1100px;
+          max-width: 1150px;
           margin: 0 auto;
         }
 
+        .topbar {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-end;
+          gap: 30px;
+          margin-bottom: 35px;
+        }
+
         .back-button {
+          display: block;
           border: none;
           background: transparent;
           padding: 0;
           margin-bottom: 25px;
           cursor: pointer;
+          color: #555;
           font-size: 14px;
           font-weight: 600;
-          color: #555;
         }
 
         .back-button:hover {
           color: #000;
-        }
-
-        .page-header {
-          display: flex;
-          align-items: flex-end;
-          justify-content: space-between;
-          gap: 20px;
-          margin-bottom: 30px;
         }
 
         .eyebrow {
@@ -515,177 +478,278 @@ export default function MaintenanceDetailPage() {
         }
 
         h1 {
+          margin: 0 0 8px;
           font-size: 40px;
           line-height: 1.1;
-          margin: 0 0 8px;
         }
 
-        .page-header p {
+        .topbar p {
           margin: 0;
           color: #777;
         }
 
-        .status-badge {
+        .add-button {
+          border: none;
           background: #171717;
           color: #d4af62;
-          padding: 10px 18px;
-          border-radius: 999px;
+          padding: 13px 20px;
+          border-radius: 10px;
+          font-weight: 700;
+          cursor: pointer;
+          white-space: nowrap;
+        }
+
+        .add-button:hover {
+          background: #2a2a2a;
+        }
+
+        .summary {
+          display: grid;
+          grid-template-columns:
+            repeat(4, 1fr);
+          gap: 15px;
+          margin-bottom: 25px;
+        }
+
+        .summary-card {
+          background: white;
+          border: 1px solid #e7e4de;
+          border-radius: 15px;
+          padding: 20px;
+        }
+
+        .summary-card span {
+          display: block;
+          color: #888;
           font-size: 13px;
+          margin-bottom: 8px;
+        }
+
+        .summary-card strong {
+          font-size: 27px;
+        }
+
+        .maintenance-list {
+          display: grid;
+          gap: 15px;
+        }
+
+        .maintenance-card {
+          width: 100%;
+          text-align: left;
+          border: 1px solid #e7e4de;
+          background: white;
+          border-radius: 18px;
+          padding: 24px;
+          cursor: pointer;
+          color: #171717;
+          transition:
+            transform 0.15s ease,
+            box-shadow 0.15s ease,
+            border-color 0.15s ease;
+        }
+
+        .maintenance-card:hover {
+          transform: translateY(-2px);
+          border-color: #c7a45a;
+          box-shadow:
+            0 10px 30px
+            rgba(0, 0, 0, 0.07);
+        }
+
+        .maintenance-card:active {
+          transform: translateY(0);
+        }
+
+        .card-top {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 20px;
+        }
+
+        .title-section {
+          display: flex;
+          align-items: center;
+          gap: 15px;
+        }
+
+        .maintenance-icon {
+          width: 50px;
+          height: 50px;
+          border-radius: 13px;
+          background: #f5f2eb;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 23px;
+          flex-shrink: 0;
+        }
+
+        .title-section h2 {
+          margin: 0 0 5px;
+          font-size: 19px;
+        }
+
+        .vehicle {
+          color: #777;
+          font-size: 14px;
+        }
+
+        .muted {
+          color: #999;
+        }
+
+        .status {
+          padding: 7px 12px;
+          border-radius: 999px;
+          background: #eee;
+          font-size: 12px;
           font-weight: 800;
           white-space: nowrap;
         }
 
-        .grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 20px;
+        .status.open {
+          background: #fff0e8;
+          color: #9a4e24;
         }
 
-        .card {
-          background: white;
-          border: 1px solid #e7e4de;
-          border-radius: 18px;
-          padding: 25px;
-          box-shadow: 0 5px 20px
-            rgba(0, 0, 0, 0.03);
+        .status.planned {
+          background: #fff7dd;
+          color: #8a6a20;
         }
 
-        .card-header {
-          margin-bottom: 20px;
+        .status.progress {
+          background: #e8f0ff;
+          color: #42648f;
         }
 
-        .card-header h2 {
-          margin: 0;
-          font-size: 20px;
+        .status.completed {
+          background: #e8f5ec;
+          color: #327044;
+        }
+
+        .status.cancelled {
+          background: #eeeeee;
+          color: #777;
+        }
+
+        .divider {
+          height: 1px;
+          background: #eeeeee;
+          margin: 20px 0;
         }
 
         .info-grid {
           display: grid;
-          grid-template-columns: 1fr 1fr;
+          grid-template-columns:
+            repeat(3, 1fr);
           gap: 20px;
         }
 
-        .info-grid div {
+        .info-item {
           display: flex;
           flex-direction: column;
           gap: 6px;
         }
 
-        .info-grid .full {
-          grid-column: 1 / -1;
-        }
-
-        .info-grid span {
-          color: #888;
+        .info-item span,
+        .description span {
+          color: #999;
           font-size: 11px;
           text-transform: uppercase;
           letter-spacing: 0.7px;
           font-weight: 700;
         }
 
-        .info-grid strong {
-          font-size: 15px;
+        .info-item strong {
+          font-size: 14px;
         }
 
         .description {
-          line-height: 1.6;
-          font-weight: 500 !important;
+          margin-top: 20px;
         }
 
-        .vehicle-box {
+        .description p {
+          margin: 7px 0 0;
+          color: #555;
+          font-size: 14px;
+          line-height: 1.5;
+        }
+
+        .card-footer {
           display: flex;
+          justify-content: space-between;
           align-items: center;
-          gap: 18px;
+          border-top: 1px solid #eeeeee;
+          margin-top: 20px;
+          padding-top: 17px;
         }
 
-        .vehicle-icon {
+        .contact {
+          color: #777;
+          font-size: 13px;
+        }
+
+        .details {
+          color: #9b762f;
+          font-size: 13px;
+          font-weight: 800;
+        }
+
+        .empty {
+          background: white;
+          border: 1px solid #e7e4de;
+          border-radius: 18px;
+          padding: 70px 30px;
+          text-align: center;
+        }
+
+        .empty-icon {
           width: 55px;
           height: 55px;
-          border-radius: 14px;
+          margin: 0 auto 15px;
+          border-radius: 50%;
           background: #f5f2eb;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 25px;
+          font-size: 24px;
         }
 
-        .vehicle-box strong {
-          font-size: 17px;
+        .empty h2 {
+          margin: 0 0 8px;
         }
 
-        .vehicle-box p {
-          margin: 5px 0 0;
-          color: #777;
-          font-size: 14px;
-        }
-
-        .muted {
+        .empty p {
           color: #888;
+          margin: 0 0 20px;
         }
 
-        .status-form {
-          display: flex;
-          gap: 12px;
-        }
-
-        .status-form select {
-          flex: 1;
-          border: 1px solid #ddd;
-          border-radius: 10px;
-          padding: 12px;
-          background: white;
-          font-size: 14px;
-        }
-
-        .status-form button {
-          border: none;
-          border-radius: 10px;
-          padding: 12px 18px;
-          background: #171717;
-          color: #d4af62;
-          font-weight: 700;
-          cursor: pointer;
-        }
-
-        .status-form button:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
-
-        .notes-card {
-          margin-top: 20px;
-        }
-
-        .notes {
-          min-height: 70px;
-          background: #f8f7f4;
-          border-radius: 12px;
-          padding: 16px;
-          line-height: 1.6;
-          font-size: 14px;
-        }
-
-        .error-box {
-          background: white;
-          border: 1px solid #e1d3c9;
-          color: #8a4b32;
-          padding: 15px 18px;
-          border-radius: 12px;
-          margin-bottom: 20px;
+        .bottom-info {
+          margin-top: 18px;
+          color: #888;
+          font-size: 13px;
+          text-align: right;
         }
 
         @media (max-width: 800px) {
-          .grid {
-            grid-template-columns: 1fr;
-          }
-
-          .page-header {
+          .topbar {
             flex-direction: column;
             align-items: flex-start;
           }
+
+          .summary {
+            grid-template-columns: 1fr 1fr;
+          }
+
+          .info-grid {
+            grid-template-columns: 1fr;
+            gap: 15px;
+          }
         }
 
-        @media (max-width: 520px) {
+        @media (max-width: 500px) {
           .admin-page {
             padding: 25px 15px 60px;
           }
@@ -694,16 +758,18 @@ export default function MaintenanceDetailPage() {
             font-size: 32px;
           }
 
-          .info-grid {
+          .summary {
             grid-template-columns: 1fr;
           }
 
-          .info-grid .full {
-            grid-column: auto;
+          .card-top {
+            flex-direction: column;
           }
 
-          .status-form {
+          .card-footer {
             flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
           }
         }
       `}</style>
