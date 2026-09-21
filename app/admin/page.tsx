@@ -60,7 +60,9 @@ export default function AdminDashboard() {
       messagesResult,
       notificationsResult,
     ] = await Promise.all([
-      supabase.from("driver").select("id", { count: "exact", head: true }),
+      supabase
+        .from("driver")
+        .select("id", { count: "exact", head: true }),
 
       supabase
         .from("vehicle")
@@ -129,7 +131,9 @@ export default function AdminDashboard() {
     return (
       <main className="admin-page">
         <div className="container">
-          <p className="loading">Dashboard laden...</p>
+          <div className="loading">
+            Dashboard laden...
+          </div>
         </div>
       </main>
     );
@@ -139,11 +143,16 @@ export default function AdminDashboard() {
     <main className="admin-page">
       <div className="container">
 
+        {/* HEADER */}
         <header className="header">
           <div>
-            <div className="eyebrow">IMPERIAL CABS</div>
+            <div className="eyebrow">
+              IMPERIAL CABS
+            </div>
 
-            <h1>Admin Dashboard</h1>
+            <h1>
+              Admin Dashboard
+            </h1>
 
             <p>
               Beheer chauffeurs, voertuigen en de dagelijkse
@@ -157,15 +166,28 @@ export default function AdminDashboard() {
           </div>
         </header>
 
-        {error && <div className="error-box">{error}</div>}
+        {error && (
+          <div className="error-box">
+            {error}
+          </div>
+        )}
 
         {/* COMMUNICATIE */}
         <section className="section communication-section">
+
           <div className="section-heading">
             <div>
-              <div className="section-label">COMMUNICATIE</div>
-              <h2>Berichten & notificaties</h2>
-              <p>Alles wat nog aandacht nodig heeft.</p>
+              <div className="section-label">
+                COMMUNICATIE
+              </div>
+
+              <h2>
+                Berichten & notificaties
+              </h2>
+
+              <p>
+                Alles wat nog aandacht nodig heeft.
+              </p>
             </div>
           </div>
 
@@ -180,9 +202,13 @@ export default function AdminDashboard() {
               </div>
 
               <div className="communication-content">
-                <span>Ongelezen berichten</span>
+                <span>
+                  Ongelezen berichten
+                </span>
 
-                <strong>{counts.unreadMessages}</strong>
+                <strong>
+                  {counts.unreadMessages}
+                </strong>
 
                 <small>
                   {counts.unreadMessages === 1
@@ -191,7 +217,9 @@ export default function AdminDashboard() {
                 </small>
               </div>
 
-              <span className="arrow">→</span>
+              <span className="arrow">
+                →
+              </span>
             </Link>
 
             <Link
@@ -203,9 +231,13 @@ export default function AdminDashboard() {
               </div>
 
               <div className="communication-content">
-                <span>Ongelezen notificaties</span>
+                <span>
+                  Ongelezen notificaties
+                </span>
 
-                <strong>{counts.unreadNotifications}</strong>
+                <strong>
+                  {counts.unreadNotifications}
+                </strong>
 
                 <small>
                   {counts.unreadNotifications === 1
@@ -214,7 +246,9 @@ export default function AdminDashboard() {
                 </small>
               </div>
 
-              <span className="arrow">→</span>
+              <span className="arrow">
+                →
+              </span>
             </Link>
 
           </div>
@@ -225,9 +259,17 @@ export default function AdminDashboard() {
 
           <div className="section-heading">
             <div>
-              <div className="section-label">FLEET MANAGEMENT</div>
-              <h2>Overzicht</h2>
-              <p>Belangrijkste onderdelen van Imperial Cabs.</p>
+              <div className="section-label">
+                FLEET MANAGEMENT
+              </div>
+
+              <h2>
+                Overzicht
+              </h2>
+
+              <p>
+                Belangrijkste onderdelen van Imperial Cabs.
+              </p>
             </div>
           </div>
 
@@ -284,14 +326,22 @@ export default function AdminDashboard() {
           </div>
         </section>
 
-        {/* QUICK ACTIONS */}
+        {/* SNELLE ACTIES */}
         <section className="section">
 
           <div className="section-heading">
             <div>
-              <div className="section-label">SNEL ACTIE</div>
-              <h2>Snelle acties</h2>
-              <p>Veelgebruikte acties direct openen.</p>
+              <div className="section-label">
+                SNEL ACTIE
+              </div>
+
+              <h2>
+                Snelle acties
+              </h2>
+
+              <p>
+                Veelgebruikte acties direct openen.
+              </p>
             </div>
           </div>
 
@@ -325,23 +375,37 @@ export default function AdminDashboard() {
           </div>
         </section>
 
+        {/* FOOTER */}
         <footer className="dashboard-footer">
-          <div>
-            <strong>IMPERIAL CABS</strong>
-            <span>Taxi Fleet Management</span>
+
+          <div className="footer-brand">
+            <strong>
+              IMPERIAL CABS
+            </strong>
+
+            <span>
+              Taxi Fleet Management
+            </span>
           </div>
 
-          <span>Amsterdam & omgeving</span>
+          <span>
+            Amsterdam & omgeving
+          </span>
+
         </footer>
 
       </div>
 
       <style jsx>{`
 
+        /* =========================
+           BASE
+        ========================= */
+
         .admin-page {
           min-height: 100vh;
-          background: #0b0b0b;
-          color: white;
+          background: #0a0a0a;
+          color: #ffffff;
           padding: 45px;
         }
 
@@ -351,9 +415,14 @@ export default function AdminDashboard() {
         }
 
         .loading {
-          color: #aaa;
+          color: #c9a24a;
           font-size: 17px;
+          padding-top: 40px;
         }
+
+        /* =========================
+           HEADER
+        ========================= */
 
         .header {
           display: flex;
@@ -366,7 +435,7 @@ export default function AdminDashboard() {
         .eyebrow {
           color: #c9a24a;
           font-size: 13px;
-          font-weight: 800;
+          font-weight: 900;
           letter-spacing: 4px;
           margin-bottom: 14px;
         }
@@ -380,7 +449,7 @@ export default function AdminDashboard() {
         }
 
         .header p {
-          color: #8f8f8f;
+          color: #909090;
           font-size: 17px;
           margin-top: 14px;
         }
@@ -389,12 +458,13 @@ export default function AdminDashboard() {
           display: flex;
           align-items: center;
           gap: 9px;
-          padding: 11px 15px;
+          padding: 12px 17px;
           background: #151515;
-          border: 1px solid #292929;
+          border: 1px solid #353535;
           border-radius: 30px;
-          color: #aaa;
+          color: #b5b5b5;
           font-size: 13px;
+          font-weight: 600;
           white-space: nowrap;
         }
 
@@ -403,8 +473,12 @@ export default function AdminDashboard() {
           height: 8px;
           border-radius: 50%;
           background: #c9a24a;
-          box-shadow: 0 0 10px rgba(201, 162, 74, 0.5);
+          box-shadow: 0 0 12px rgba(201, 162, 74, 0.65);
         }
+
+        /* =========================
+           SECTIONS
+        ========================= */
 
         .section {
           margin-top: 50px;
@@ -421,7 +495,7 @@ export default function AdminDashboard() {
         .section-label {
           color: #c9a24a;
           font-size: 11px;
-          font-weight: 800;
+          font-weight: 900;
           letter-spacing: 3px;
           margin-bottom: 8px;
         }
@@ -434,11 +508,13 @@ export default function AdminDashboard() {
 
         .section-heading p {
           margin: 7px 0 0;
-          color: #777;
+          color: #777777;
           font-size: 15px;
         }
 
-        /* COMMUNICATION */
+        /* =========================
+           COMMUNICATION CARDS
+        ========================= */
 
         .communication-grid {
           display: grid;
@@ -450,36 +526,35 @@ export default function AdminDashboard() {
           display: flex;
           align-items: center;
           gap: 18px;
-          background: linear-gradient(
-            145deg,
-            #181818,
-            #111111
-          );
-          border: 1px solid #292929;
+          background: #171717;
+          border: 1px solid #3a3a3a;
           border-radius: 20px;
           padding: 25px;
           color: white;
           text-decoration: none;
-          transition: 0.2s ease;
+          transition: all 0.2s ease;
         }
 
         .communication-card:hover {
           border-color: #c9a24a;
-          transform: translateY(-2px);
-          box-shadow: 0 10px 35px rgba(0, 0, 0, 0.3);
+          background: #1d1d1d;
+          transform: translateY(-3px);
+          box-shadow:
+            0 12px 35px rgba(0, 0, 0, 0.35),
+            0 0 25px rgba(201, 162, 74, 0.08);
         }
 
         .communication-icon {
-          width: 56px;
-          height: 56px;
-          min-width: 56px;
+          width: 58px;
+          height: 58px;
+          min-width: 58px;
           border-radius: 15px;
           background: #211d14;
-          border: 1px solid #3b311d;
+          border: 1px solid #5a4823;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 23px;
+          font-size: 24px;
         }
 
         .communication-content {
@@ -488,30 +563,33 @@ export default function AdminDashboard() {
 
         .communication-content span {
           display: block;
-          color: #999;
+          color: #aaaaaa;
           font-size: 13px;
-          margin-bottom: 6px;
+          margin-bottom: 7px;
         }
 
         .communication-content strong {
           display: block;
-          color: #c9a24a;
-          font-size: 34px;
+          color: #d2ad5b;
+          font-size: 36px;
           line-height: 1;
           margin-bottom: 7px;
         }
 
         .communication-content small {
-          color: #777;
+          color: #777777;
           font-size: 13px;
         }
 
         .arrow {
-          color: #c9a24a;
-          font-size: 23px;
+          color: #d2ad5b;
+          font-size: 30px;
+          font-weight: 700;
         }
 
-        /* DASHBOARD CARDS */
+        /* =========================
+           DASHBOARD CARDS
+        ========================= */
 
         .cards-grid {
           display: grid;
@@ -522,122 +600,152 @@ export default function AdminDashboard() {
         .dashboard-card {
           display: block;
           background: #151515;
-          border: 1px solid #292929;
+          border: 1px solid #363636;
           border-radius: 19px;
           padding: 27px;
           color: white;
           text-decoration: none;
-          transition: 0.2s ease;
+          transition: all 0.2s ease;
         }
 
         .dashboard-card:hover {
           border-color: #c9a24a;
-          transform: translateY(-2px);
-          background: #181818;
+          background: #1a1a1a;
+          transform: translateY(-3px);
+          box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
         }
 
         .card-icon {
-          width: 45px;
-          height: 45px;
+          width: 46px;
+          height: 46px;
           display: flex;
           align-items: center;
           justify-content: center;
           border-radius: 12px;
           background: #211d14;
-          border: 1px solid #3b311d;
+          border: 1px solid #5a4823;
           font-size: 21px;
           margin-bottom: 20px;
         }
 
         .dashboard-card h3 {
           margin: 0 0 13px;
-          color: #e7e7e7;
+          color: #e9e9e9;
           font-size: 18px;
         }
 
         .card-count {
-          color: #c9a24a;
-          font-size: 38px;
-          font-weight: 800;
+          color: #d2ad5b;
+          font-size: 39px;
+          font-weight: 900;
           line-height: 1;
           margin-bottom: 8px;
         }
 
         .card-label {
-          color: #777;
+          color: #777777;
           font-size: 13px;
         }
 
-        /* QUICK ACTIONS */
+        /* =========================
+           QUICK ACTION BUTTONS
+        ========================= */
 
         .quick-actions {
           display: flex;
           flex-wrap: wrap;
-          gap: 10px;
+          gap: 12px;
         }
 
         .quick-actions a {
           display: inline-flex;
           align-items: center;
+          justify-content: center;
           gap: 9px;
-          background: #151515;
-          border: 1px solid #292929;
+
+          background: #c9a24a;
+          border: 1px solid #c9a24a;
           border-radius: 11px;
-          padding: 14px 17px;
-          color: #bbb;
+
+          padding: 14px 20px;
+
+          color: #0a0a0a;
           text-decoration: none;
-          font-weight: 600;
+
+          font-weight: 800;
           font-size: 14px;
-          transition: 0.2s ease;
+
+          box-shadow:
+            0 4px 14px rgba(0, 0, 0, 0.25);
+
+          transition: all 0.2s ease;
         }
 
         .quick-actions a:hover {
-          border-color: #c9a24a;
-          color: #c9a24a;
+          background: #e0bd67;
+          border-color: #e0bd67;
+          color: #080808;
+
+          transform: translateY(-2px);
+
+          box-shadow:
+            0 8px 22px rgba(201, 162, 74, 0.20);
         }
 
         .quick-actions span {
-          color: #c9a24a;
+          color: #0a0a0a;
+          font-weight: 900;
         }
 
-        /* ERROR */
+        /* =========================
+           ERROR
+        ========================= */
 
         .error-box {
           background: #241414;
           color: #e5aaaa;
-          border: 1px solid #4a2424;
+          border: 1px solid #572929;
           padding: 15px 18px;
           border-radius: 12px;
           margin-bottom: 25px;
         }
 
-        /* FOOTER */
+        /* =========================
+           FOOTER
+        ========================= */
 
         .dashboard-footer {
           display: flex;
           justify-content: space-between;
           align-items: center;
+
           margin-top: 65px;
           padding-top: 25px;
-          border-top: 1px solid #242424;
-          color: #666;
+
+          border-top: 1px solid #292929;
+
+          color: #666666;
           font-size: 13px;
         }
 
-        .dashboard-footer div {
+        .footer-brand {
           display: flex;
           align-items: center;
           gap: 12px;
         }
 
-        .dashboard-footer strong {
+        .footer-brand strong {
           color: #c9a24a;
           letter-spacing: 2px;
         }
 
-        .dashboard-footer span {
-          color: #666;
+        .footer-brand span {
+          color: #666666;
         }
+
+        /* =========================
+           TABLET
+        ========================= */
 
         @media (max-width: 850px) {
 
@@ -653,14 +761,21 @@ export default function AdminDashboard() {
             font-size: 42px;
           }
 
-          .communication-grid,
-          .cards-grid {
+          .communication-grid {
             grid-template-columns: 1fr;
+          }
+
+          .cards-grid {
+            grid-template-columns: 1fr 1fr;
           }
 
         }
 
-        @media (max-width: 550px) {
+        /* =========================
+           MOBILE
+        ========================= */
+
+        @media (max-width: 600px) {
 
           .admin-page {
             padding: 25px 16px;
@@ -668,6 +783,10 @@ export default function AdminDashboard() {
 
           h1 {
             font-size: 36px;
+          }
+
+          .cards-grid {
+            grid-template-columns: 1fr;
           }
 
           .communication-card {
@@ -710,14 +829,25 @@ function DashboardCard({
   label: string;
 }) {
   return (
-    <Link href={href} className="dashboard-card">
-      <div className="card-icon">{icon}</div>
+    <Link
+      href={href}
+      className="dashboard-card"
+    >
+      <div className="card-icon">
+        {icon}
+      </div>
 
-      <h3>{title}</h3>
+      <h3>
+        {title}
+      </h3>
 
-      <div className="card-count">{count}</div>
+      <div className="card-count">
+        {count}
+      </div>
 
-      <div className="card-label">{label}</div>
+      <div className="card-label">
+        {label}
+      </div>
     </Link>
   );
 }
