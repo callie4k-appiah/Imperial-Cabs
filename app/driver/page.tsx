@@ -92,9 +92,8 @@ export default function DriverDashboard() {
     const { data: driverData, error: driverError } = await supabase
       .from("driver")
       .select("*")
-      .eq("email", user.email)
-      .single();
-
+      .ilike("email", user.email ?? "")
+.single();
     if (driverError || !driverData) {
       setError(
         "Er is nog geen chauffeursprofiel gekoppeld aan dit account."
