@@ -206,7 +206,25 @@ export default function DriverLoginPage() {
           margin-bottom: 15px;
           font-size: 14px;
         }
+.register-link {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  margin-top: 25px;
+  font-size: 14px;
+  color: #777;
+}
 
+.register-link a {
+  color: #9b7427;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.register-link a:hover {
+  text-decoration: underline;
+}
         .footer {
           text-align: center;
           color: #999;
