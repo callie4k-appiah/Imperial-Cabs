@@ -129,7 +129,7 @@ export default function AdminDashboard() {
     return (
       <main className="admin-page">
         <div className="container">
-          <p>Dashboard laden...</p>
+          <p className="loading">Dashboard laden...</p>
         </div>
       </main>
     );
@@ -138,6 +138,7 @@ export default function AdminDashboard() {
   return (
     <main className="admin-page">
       <div className="container">
+
         <header className="header">
           <div>
             <div className="eyebrow">IMPERIAL CABS</div>
@@ -149,22 +150,34 @@ export default function AdminDashboard() {
               fleetactiviteiten.
             </p>
           </div>
+
+          <div className="header-badge">
+            <span className="status-dot"></span>
+            Systeem actief
+          </div>
         </header>
 
         {error && <div className="error-box">{error}</div>}
 
         {/* COMMUNICATIE */}
-        <section className="communication-section">
+        <section className="section communication-section">
           <div className="section-heading">
             <div>
-              <h2>Communicatie</h2>
-              <p>Nieuwe berichten en notificaties.</p>
+              <div className="section-label">COMMUNICATIE</div>
+              <h2>Berichten & notificaties</h2>
+              <p>Alles wat nog aandacht nodig heeft.</p>
             </div>
           </div>
 
           <div className="communication-grid">
-            <Link href="/admin/messages" className="communication-card">
-              <div className="communication-icon">💬</div>
+
+            <Link
+              href="/admin/messages"
+              className="communication-card"
+            >
+              <div className="communication-icon">
+                💬
+              </div>
 
               <div className="communication-content">
                 <span>Ongelezen berichten</span>
@@ -185,7 +198,9 @@ export default function AdminDashboard() {
               href="/admin/notifications"
               className="communication-card"
             >
-              <div className="communication-icon">🔔</div>
+              <div className="communication-icon">
+                🔔
+              </div>
 
               <div className="communication-content">
                 <span>Ongelezen notificaties</span>
@@ -201,19 +216,23 @@ export default function AdminDashboard() {
 
               <span className="arrow">→</span>
             </Link>
+
           </div>
         </section>
 
         {/* OVERZICHT */}
         <section className="section">
+
           <div className="section-heading">
             <div>
+              <div className="section-label">FLEET MANAGEMENT</div>
               <h2>Overzicht</h2>
               <p>Belangrijkste onderdelen van Imperial Cabs.</p>
             </div>
           </div>
 
           <div className="cards-grid">
+
             <DashboardCard
               href="/admin/drivers"
               icon="👤"
@@ -240,7 +259,7 @@ export default function AdminDashboard() {
 
             <DashboardCard
               href="/admin/payments"
-              icon="💶"
+              icon="€"
               title="Open betalingen"
               count={counts.payments}
               label="Betalingen open"
@@ -261,47 +280,69 @@ export default function AdminDashboard() {
               count={counts.maintenance}
               label="Open onderhoud"
             />
+
           </div>
         </section>
 
-        {/* SNELLE ACTIES */}
+        {/* QUICK ACTIONS */}
         <section className="section">
+
           <div className="section-heading">
             <div>
+              <div className="section-label">SNEL ACTIE</div>
               <h2>Snelle acties</h2>
               <p>Veelgebruikte acties direct openen.</p>
             </div>
           </div>
 
           <div className="quick-actions">
+
             <Link href="/admin/drivers/new">
-              + Nieuwe chauffeur
+              <span>+</span>
+              Nieuwe chauffeur
             </Link>
 
             <Link href="/admin/vehicle/new">
-              + Nieuw voertuig
+              <span>+</span>
+              Nieuw voertuig
             </Link>
 
             <Link href="/admin/applications">
-              📋 Aanvragen bekijken
+              <span>📋</span>
+              Aanvragen bekijken
             </Link>
 
             <Link href="/admin/messages/new">
-              💬 Nieuw bericht
+              <span>💬</span>
+              Nieuw bericht
             </Link>
 
             <Link href="/admin/notifications/new">
-              🔔 Nieuwe notificatie
+              <span>🔔</span>
+              Nieuwe notificatie
             </Link>
+
           </div>
         </section>
+
+        <footer className="dashboard-footer">
+          <div>
+            <strong>IMPERIAL CABS</strong>
+            <span>Taxi Fleet Management</span>
+          </div>
+
+          <span>Amsterdam & omgeving</span>
+        </footer>
+
       </div>
 
       <style jsx>{`
+
         .admin-page {
           min-height: 100vh;
-          background: #f7f6f3;
-          padding: 40px;
+          background: #0b0b0b;
+          color: white;
+          padding: 45px;
         }
 
         .container {
@@ -309,56 +350,95 @@ export default function AdminDashboard() {
           margin: 0 auto;
         }
 
+        .loading {
+          color: #aaa;
+          font-size: 17px;
+        }
+
         .header {
-          margin-bottom: 45px;
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          gap: 30px;
+          margin-bottom: 55px;
         }
 
         .eyebrow {
-          color: #b38a32;
-          font-size: 15px;
+          color: #c9a24a;
+          font-size: 13px;
           font-weight: 800;
-          letter-spacing: 3px;
-          margin-bottom: 12px;
+          letter-spacing: 4px;
+          margin-bottom: 14px;
         }
 
         h1 {
           margin: 0;
-          font-size: 50px;
+          color: #ffffff;
+          font-size: 52px;
+          line-height: 1;
           letter-spacing: -2px;
-          color: #151515;
         }
 
         .header p {
-          color: #777;
-          font-size: 18px;
-          margin-top: 12px;
+          color: #8f8f8f;
+          font-size: 17px;
+          margin-top: 14px;
+        }
+
+        .header-badge {
+          display: flex;
+          align-items: center;
+          gap: 9px;
+          padding: 11px 15px;
+          background: #151515;
+          border: 1px solid #292929;
+          border-radius: 30px;
+          color: #aaa;
+          font-size: 13px;
+          white-space: nowrap;
+        }
+
+        .status-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: #c9a24a;
+          box-shadow: 0 0 10px rgba(201, 162, 74, 0.5);
         }
 
         .section {
-          margin-top: 45px;
+          margin-top: 50px;
         }
 
         .communication-section {
-          margin-bottom: 45px;
+          margin-top: 0;
         }
 
         .section-heading {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 20px;
+          margin-bottom: 22px;
+        }
+
+        .section-label {
+          color: #c9a24a;
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 3px;
+          margin-bottom: 8px;
         }
 
         .section-heading h2 {
-          margin: 0 0 5px;
-          font-size: 24px;
-          color: #181818;
+          margin: 0;
+          color: #ffffff;
+          font-size: 25px;
         }
 
         .section-heading p {
-          margin: 0;
-          color: #888;
+          margin: 7px 0 0;
+          color: #777;
+          font-size: 15px;
         }
+
+        /* COMMUNICATION */
 
         .communication-grid {
           display: grid;
@@ -370,30 +450,36 @@ export default function AdminDashboard() {
           display: flex;
           align-items: center;
           gap: 18px;
-          background: #181818;
-          color: white;
-          text-decoration: none;
+          background: linear-gradient(
+            145deg,
+            #181818,
+            #111111
+          );
+          border: 1px solid #292929;
           border-radius: 20px;
           padding: 25px;
-          border: 1px solid #272727;
+          color: white;
+          text-decoration: none;
           transition: 0.2s ease;
         }
 
         .communication-card:hover {
+          border-color: #c9a24a;
           transform: translateY(-2px);
-          border-color: #b38a32;
+          box-shadow: 0 10px 35px rgba(0, 0, 0, 0.3);
         }
 
         .communication-icon {
-          width: 55px;
-          height: 55px;
-          min-width: 55px;
+          width: 56px;
+          height: 56px;
+          min-width: 56px;
           border-radius: 15px;
-          background: #2a2a2a;
+          background: #211d14;
+          border: 1px solid #3b311d;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 24px;
+          font-size: 23px;
         }
 
         .communication-content {
@@ -402,122 +488,188 @@ export default function AdminDashboard() {
 
         .communication-content span {
           display: block;
-          color: #cfcfcf;
-          font-size: 14px;
-          margin-bottom: 5px;
+          color: #999;
+          font-size: 13px;
+          margin-bottom: 6px;
         }
 
         .communication-content strong {
           display: block;
-          color: #d9b45a;
-          font-size: 32px;
+          color: #c9a24a;
+          font-size: 34px;
           line-height: 1;
-          margin-bottom: 6px;
+          margin-bottom: 7px;
         }
 
         .communication-content small {
-          color: #999;
+          color: #777;
+          font-size: 13px;
         }
 
         .arrow {
-          color: #d9b45a;
-          font-size: 22px;
+          color: #c9a24a;
+          font-size: 23px;
         }
+
+        /* DASHBOARD CARDS */
 
         .cards-grid {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
-          gap: 20px;
+          gap: 18px;
         }
 
         .dashboard-card {
           display: block;
-          background: white;
-          border: 1px solid #e4e1da;
-          border-radius: 20px;
+          background: #151515;
+          border: 1px solid #292929;
+          border-radius: 19px;
           padding: 27px;
+          color: white;
           text-decoration: none;
-          color: inherit;
           transition: 0.2s ease;
         }
 
         .dashboard-card:hover {
+          border-color: #c9a24a;
           transform: translateY(-2px);
-          border-color: #c5a45a;
+          background: #181818;
         }
 
         .card-icon {
-          font-size: 28px;
+          width: 45px;
+          height: 45px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 12px;
+          background: #211d14;
+          border: 1px solid #3b311d;
+          font-size: 21px;
           margin-bottom: 20px;
         }
 
         .dashboard-card h3 {
-          margin: 0 0 10px;
-          font-size: 20px;
-          color: #181818;
+          margin: 0 0 13px;
+          color: #e7e7e7;
+          font-size: 18px;
         }
 
         .card-count {
+          color: #c9a24a;
           font-size: 38px;
           font-weight: 800;
-          color: #a47a25;
           line-height: 1;
           margin-bottom: 8px;
         }
 
         .card-label {
-          color: #888;
-          font-size: 14px;
+          color: #777;
+          font-size: 13px;
         }
+
+        /* QUICK ACTIONS */
 
         .quick-actions {
           display: flex;
           flex-wrap: wrap;
-          gap: 12px;
+          gap: 10px;
         }
 
         .quick-actions a {
           display: inline-flex;
           align-items: center;
-          background: white;
-          border: 1px solid #ddd8ce;
+          gap: 9px;
+          background: #151515;
+          border: 1px solid #292929;
           border-radius: 11px;
-          padding: 14px 18px;
-          color: #333;
+          padding: 14px 17px;
+          color: #bbb;
           text-decoration: none;
-          font-weight: 700;
+          font-weight: 600;
+          font-size: 14px;
+          transition: 0.2s ease;
         }
 
         .quick-actions a:hover {
-          border-color: #b38a32;
-          color: #9b7427;
+          border-color: #c9a24a;
+          color: #c9a24a;
         }
 
+        .quick-actions span {
+          color: #c9a24a;
+        }
+
+        /* ERROR */
+
         .error-box {
-          background: #fff1f1;
-          color: #a33;
-          border: 1px solid #efcccc;
+          background: #241414;
+          color: #e5aaaa;
+          border: 1px solid #4a2424;
           padding: 15px 18px;
           border-radius: 12px;
           margin-bottom: 25px;
         }
 
+        /* FOOTER */
+
+        .dashboard-footer {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-top: 65px;
+          padding-top: 25px;
+          border-top: 1px solid #242424;
+          color: #666;
+          font-size: 13px;
+        }
+
+        .dashboard-footer div {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .dashboard-footer strong {
+          color: #c9a24a;
+          letter-spacing: 2px;
+        }
+
+        .dashboard-footer span {
+          color: #666;
+        }
+
         @media (max-width: 850px) {
+
           .admin-page {
-            padding: 25px 20px;
+            padding: 30px 20px;
+          }
+
+          .header {
+            flex-direction: column;
           }
 
           h1 {
-            font-size: 40px;
+            font-size: 42px;
           }
 
           .communication-grid,
           .cards-grid {
             grid-template-columns: 1fr;
           }
+
         }
 
         @media (max-width: 550px) {
+
+          .admin-page {
+            padding: 25px 16px;
+          }
+
+          h1 {
+            font-size: 36px;
+          }
+
           .communication-card {
             padding: 20px;
           }
@@ -530,7 +682,15 @@ export default function AdminDashboard() {
             width: 100%;
             box-sizing: border-box;
           }
+
+          .dashboard-footer {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+          }
+
         }
+
       `}</style>
     </main>
   );
