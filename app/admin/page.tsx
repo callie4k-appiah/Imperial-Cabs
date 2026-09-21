@@ -51,77 +51,95 @@ export default function AdminDashboard() {
     }
 
     const [
-      driversResult,
-      vehiclesResult,
-      applicationsResult,
-      paymentsResult,
-      damagesResult,
-      maintenanceResult,
-      messagesResult,
-      notificationsResult,
+      drivers,
+      vehicles,
+      applications,
+      payments,
+      damages,
+      maintenance,
+      messages,
+      notifications,
     ] = await Promise.all([
-      supabase
-        .from("driver")
-        .select("id", { count: "exact", head: true }),
+      supabase.from("driver").select("id", {
+        count: "exact",
+        head: true,
+      }),
 
-      supabase
-        .from("vehicle")
-        .select("id", { count: "exact", head: true }),
+      supabase.from("vehicle").select("id", {
+        count: "exact",
+        head: true,
+      }),
 
-      supabase
-        .from("applications")
-        .select("id", { count: "exact", head: true }),
+      supabase.from("applications").select("id", {
+        count: "exact",
+        head: true,
+      }),
 
       supabase
         .from("payments")
-        .select("id", { count: "exact", head: true })
+        .select("id", {
+          count: "exact",
+          head: true,
+        })
         .eq("status", "open"),
 
       supabase
         .from("damage_reports")
-        .select("id", { count: "exact", head: true })
+        .select("id", {
+          count: "exact",
+          head: true,
+        })
         .eq("status", "open"),
 
       supabase
         .from("maintenance")
-        .select("id", { count: "exact", head: true })
+        .select("id", {
+          count: "exact",
+          head: true,
+        })
         .eq("status", "open"),
 
       supabase
         .from("messages")
-        .select("id", { count: "exact", head: true })
+        .select("id", {
+          count: "exact",
+          head: true,
+        })
         .eq("is_read", false),
 
       supabase
         .from("notifications")
-        .select("id", { count: "exact", head: true })
+        .select("id", {
+          count: "exact",
+          head: true,
+        })
         .eq("is_read", false),
     ]);
 
-    const errors = [
-      driversResult.error,
-      vehiclesResult.error,
-      applicationsResult.error,
-      paymentsResult.error,
-      damagesResult.error,
-      maintenanceResult.error,
-      messagesResult.error,
-      notificationsResult.error,
-    ].filter(Boolean);
+    const hasError = [
+      drivers.error,
+      vehicles.error,
+      applications.error,
+      payments.error,
+      damages.error,
+      maintenance.error,
+      messages.error,
+      notifications.error,
+    ].some(Boolean);
 
-    if (errors.length > 0) {
+    if (hasError) {
       setError("Een deel van het dashboard kon niet worden geladen.");
     }
 
     setCounts({
-      drivers: driversResult.count || 0,
-      vehicles: vehiclesResult.count || 0,
-      applications: applicationsResult.count || 0,
-      payments: paymentsResult.count || 0,
-      damages: damagesResult.count || 0,
-      maintenance: maintenanceResult.count || 0,
-      unreadMessages: messagesResult.count || 0,
-      unreadNotifications: notificationsResult.count || 0,
+      drivers: drivers.count || 0,
+      vehicles: vehicles.count || 0,
+      applications: applications.count || 0,
+      payments: payments.count || 0,
+      damages: damages.count || 0,
+      maintenance: maintenance.count || 0,
+      unreadMessages: messages.count || 0,
+      unreadNotifications: notifications.count || 0,
     });
 
     setLoading(false);
@@ -129,24 +147,36 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <main className="admin-page">
-        <div className="container">
-          <div className="loading">
-            Dashboard laden...
-          </div>
-        </div>
+      <main className="dashboard">
+        <div className="loading">Dashboard laden...</div>
+
+        <style jsx>{`
+          .dashboard {
+            min-height: 100vh;
+            background: #0a0a0a;
+            color: white;
+            padding: 50px;
+          }
+
+          .loading {
+            color: #d2ad5b;
+            font-size: 18px;
+          }
+        `}</style>
       </main>
     );
   }
 
   return (
-    <main className="admin-page">
-      <div className="container">
+    <main className="dashboard">
+      <div className="dashboard-container">
 
         {/* HEADER */}
+
         <header className="header">
+
           <div>
-            <div className="eyebrow">
+            <div className="brand">
               IMPERIAL CABS
             </div>
 
@@ -155,27 +185,29 @@ export default function AdminDashboard() {
             </h1>
 
             <p>
-              Beheer chauffeurs, voertuigen en de dagelijkse
-              fleetactiviteiten.
+              Beheer je volledige taxi fleet vanuit één omgeving.
             </p>
           </div>
 
-          <div className="header-badge">
-            <span className="status-dot"></span>
+          <div className="system-status">
+            <span />
             Systeem actief
           </div>
+
         </header>
 
         {error && (
-          <div className="error-box">
+          <div className="error">
             {error}
           </div>
         )}
 
-        {/* COMMUNICATIE */}
-        <section className="section communication-section">
+        {/* COMMUNICATION */}
 
-          <div className="section-heading">
+        <section className="section">
+
+          <div className="section-header">
+
             <div>
               <div className="section-label">
                 COMMUNICATIE
@@ -186,9 +218,10 @@ export default function AdminDashboard() {
               </h2>
 
               <p>
-                Alles wat nog aandacht nodig heeft.
+                Nieuwe communicatie die aandacht nodig heeft.
               </p>
             </div>
+
           </div>
 
           <div className="communication-grid">
@@ -197,11 +230,13 @@ export default function AdminDashboard() {
               href="/admin/messages"
               className="communication-card"
             >
+
               <div className="communication-icon">
                 💬
               </div>
 
-              <div className="communication-content">
+              <div className="communication-text">
+
                 <span>
                   Ongelezen berichten
                 </span>
@@ -211,26 +246,28 @@ export default function AdminDashboard() {
                 </strong>
 
                 <small>
-                  {counts.unreadMessages === 1
-                    ? "1 bericht wacht op aandacht"
-                    : `${counts.unreadMessages} berichten wachten op aandacht`}
+                  Bekijk alle berichten
                 </small>
+
               </div>
 
-              <span className="arrow">
+              <div className="card-arrow">
                 →
-              </span>
+              </div>
+
             </Link>
 
             <Link
               href="/admin/notifications"
               className="communication-card"
             >
+
               <div className="communication-icon">
                 🔔
               </div>
 
-              <div className="communication-content">
+              <div className="communication-text">
+
                 <span>
                   Ongelezen notificaties
                 </span>
@@ -240,24 +277,27 @@ export default function AdminDashboard() {
                 </strong>
 
                 <small>
-                  {counts.unreadNotifications === 1
-                    ? "1 notificatie wacht op aandacht"
-                    : `${counts.unreadNotifications} notificaties wachten op aandacht`}
+                  Bekijk alle notificaties
                 </small>
+
               </div>
 
-              <span className="arrow">
+              <div className="card-arrow">
                 →
-              </span>
+              </div>
+
             </Link>
 
           </div>
+
         </section>
 
-        {/* OVERZICHT */}
+        {/* FLEET */}
+
         <section className="section">
 
-          <div className="section-heading">
+          <div className="section-header">
+
             <div>
               <div className="section-label">
                 FLEET MANAGEMENT
@@ -271,16 +311,17 @@ export default function AdminDashboard() {
                 Belangrijkste onderdelen van Imperial Cabs.
               </p>
             </div>
+
           </div>
 
-          <div className="cards-grid">
+          <div className="fleet-grid">
 
             <DashboardCard
               href="/admin/drivers"
               icon="👤"
               title="Chauffeurs"
               count={counts.drivers}
-              label="Geregistreerde chauffeurs"
+              text="Geregistreerde chauffeurs"
             />
 
             <DashboardCard
@@ -288,7 +329,7 @@ export default function AdminDashboard() {
               icon="🚗"
               title="Voertuigen"
               count={counts.vehicles}
-              label="Voertuigen in systeem"
+              text="Voertuigen in systeem"
             />
 
             <DashboardCard
@@ -296,7 +337,7 @@ export default function AdminDashboard() {
               icon="📋"
               title="Aanvragen"
               count={counts.applications}
-              label="Chauffeursaanvragen"
+              text="Chauffeursaanvragen"
             />
 
             <DashboardCard
@@ -304,7 +345,7 @@ export default function AdminDashboard() {
               icon="€"
               title="Open betalingen"
               count={counts.payments}
-              label="Betalingen open"
+              text="Betalingen open"
             />
 
             <DashboardCard
@@ -312,7 +353,7 @@ export default function AdminDashboard() {
               icon="⚠️"
               title="Open schades"
               count={counts.damages}
-              label="Schademeldingen"
+              text="Schademeldingen"
             />
 
             <DashboardCard
@@ -320,16 +361,19 @@ export default function AdminDashboard() {
               icon="🔧"
               title="Onderhoud"
               count={counts.maintenance}
-              label="Open onderhoud"
+              text="Open onderhoud"
             />
 
           </div>
+
         </section>
 
-        {/* SNELLE ACTIES */}
+        {/* QUICK ACTIONS */}
+
         <section className="section">
 
-          <div className="section-heading">
+          <div className="section-header">
+
             <div>
               <div className="section-label">
                 SNEL ACTIE
@@ -343,42 +387,50 @@ export default function AdminDashboard() {
                 Veelgebruikte acties direct openen.
               </p>
             </div>
-          </div>
-
-          <div className="quick-actions">
-
-            <Link href="/admin/drivers/new">
-              <span>+</span>
-              Nieuwe chauffeur
-            </Link>
-
-            <Link href="/admin/vehicle/new">
-              <span>+</span>
-              Nieuw voertuig
-            </Link>
-
-            <Link href="/admin/applications">
-              <span>📋</span>
-              Aanvragen bekijken
-            </Link>
-
-            <Link href="/admin/messages/new">
-              <span>💬</span>
-              Nieuw bericht
-            </Link>
-
-            <Link href="/admin/notifications/new">
-              <span>🔔</span>
-              Nieuwe notificatie
-            </Link>
 
           </div>
+
+          <div className="actions">
+
+            <ActionButton
+              href="/admin/drivers/new"
+              icon="+"
+              text="Nieuwe chauffeur"
+            />
+
+            <ActionButton
+              href="/admin/vehicle/new"
+              icon="+"
+              text="Nieuw voertuig"
+            />
+
+            <ActionButton
+              href="/admin/applications"
+              icon="📋"
+              text="Aanvragen bekijken"
+            />
+
+            <ActionButton
+              href="/admin/messages/new"
+              icon="💬"
+              text="Nieuw bericht"
+            />
+
+            <ActionButton
+              href="/admin/notifications/new"
+              icon="🔔"
+              text="Nieuwe notificatie"
+            />
+
+          </div>
+
         </section>
 
         {/* FOOTER */}
-        <footer className="dashboard-footer">
 
-          <div className="footer-brand">
+        <footer className="footer">
+
+          <div>
             <strong>
               IMPERIAL CABS
             </strong>
@@ -399,25 +451,19 @@ export default function AdminDashboard() {
       <style jsx>{`
 
         /* =========================
-           BASE
+           PAGE
         ========================= */
 
-        .admin-page {
+        .dashboard {
           min-height: 100vh;
           background: #0a0a0a;
           color: #ffffff;
-          padding: 45px;
+          padding: 50px;
         }
 
-        .container {
+        .dashboard-container {
           max-width: 1200px;
           margin: 0 auto;
-        }
-
-        .loading {
-          color: #c9a24a;
-          font-size: 17px;
-          padding-top: 40px;
         }
 
         /* =========================
@@ -429,51 +475,51 @@ export default function AdminDashboard() {
           justify-content: space-between;
           align-items: flex-start;
           gap: 30px;
-          margin-bottom: 55px;
+          margin-bottom: 65px;
         }
 
-        .eyebrow {
-          color: #c9a24a;
+        .brand {
+          color: #d2ad5b;
           font-size: 13px;
           font-weight: 900;
           letter-spacing: 4px;
-          margin-bottom: 14px;
+          margin-bottom: 15px;
         }
 
         h1 {
           margin: 0;
-          color: #ffffff;
-          font-size: 52px;
+          font-size: 54px;
           line-height: 1;
           letter-spacing: -2px;
+          color: #ffffff;
         }
 
         .header p {
-          color: #909090;
+          margin: 15px 0 0;
+          color: #888888;
           font-size: 17px;
-          margin-top: 14px;
         }
 
-        .header-badge {
+        .system-status {
           display: flex;
           align-items: center;
           gap: 9px;
-          padding: 12px 17px;
           background: #151515;
-          border: 1px solid #353535;
+          border: 1px solid #363636;
           border-radius: 30px;
-          color: #b5b5b5;
+          padding: 12px 17px;
+          color: #bdbdbd;
           font-size: 13px;
-          font-weight: 600;
+          font-weight: 700;
           white-space: nowrap;
         }
 
-        .status-dot {
+        .system-status span {
           width: 8px;
           height: 8px;
           border-radius: 50%;
-          background: #c9a24a;
-          box-shadow: 0 0 12px rgba(201, 162, 74, 0.65);
+          background: #d2ad5b;
+          box-shadow: 0 0 12px rgba(210, 173, 91, 0.7);
         }
 
         /* =========================
@@ -481,94 +527,104 @@ export default function AdminDashboard() {
         ========================= */
 
         .section {
-          margin-top: 50px;
+          margin-top: 60px;
         }
 
-        .communication-section {
+        .section:first-of-type {
           margin-top: 0;
         }
 
-        .section-heading {
-          margin-bottom: 22px;
+        .section-header {
+          margin-bottom: 25px;
         }
 
         .section-label {
-          color: #c9a24a;
+          color: #d2ad5b;
           font-size: 11px;
           font-weight: 900;
           letter-spacing: 3px;
           margin-bottom: 8px;
         }
 
-        .section-heading h2 {
+        .section-header h2 {
           margin: 0;
+          font-size: 27px;
           color: #ffffff;
-          font-size: 25px;
         }
 
-        .section-heading p {
+        .section-header p {
           margin: 7px 0 0;
           color: #777777;
           font-size: 15px;
         }
 
         /* =========================
-           COMMUNICATION CARDS
+           COMMUNICATION
         ========================= */
 
         .communication-grid {
           display: grid;
-          grid-template-columns: 1fr 1fr;
+          grid-template-columns: repeat(2, 1fr);
           gap: 20px;
         }
 
         .communication-card {
           display: flex;
           align-items: center;
-          gap: 18px;
-          background: #171717;
+          gap: 20px;
+
+          min-height: 125px;
+
+          padding: 25px;
+
+          background: #151515;
           border: 1px solid #3a3a3a;
           border-radius: 20px;
-          padding: 25px;
+
           color: white;
           text-decoration: none;
+
           transition: all 0.2s ease;
         }
 
         .communication-card:hover {
-          border-color: #c9a24a;
-          background: #1d1d1d;
+          background: #1b1b1b;
+          border-color: #d2ad5b;
           transform: translateY(-3px);
+
           box-shadow:
-            0 12px 35px rgba(0, 0, 0, 0.35),
-            0 0 25px rgba(201, 162, 74, 0.08);
+            0 15px 35px rgba(0, 0, 0, 0.4),
+            0 0 25px rgba(210, 173, 91, 0.08);
         }
 
         .communication-icon {
           width: 58px;
           height: 58px;
           min-width: 58px;
-          border-radius: 15px;
-          background: #211d14;
-          border: 1px solid #5a4823;
+
           display: flex;
           align-items: center;
           justify-content: center;
+
+          background: #211d14;
+          border: 1px solid #5c4923;
+          border-radius: 15px;
+
           font-size: 24px;
         }
 
-        .communication-content {
+        .communication-text {
           flex: 1;
         }
 
-        .communication-content span {
+        .communication-text span {
           display: block;
-          color: #aaaaaa;
+          color: #999999;
           font-size: 13px;
-          margin-bottom: 7px;
+          margin-bottom: 5px;
         }
 
-        .communication-content strong {
+        .communication-text strong {
           display: block;
           color: #d2ad5b;
           font-size: 36px;
@@ -576,124 +632,138 @@ export default function AdminDashboard() {
           margin-bottom: 7px;
         }
 
-        .communication-content small {
+        .communication-text small {
           color: #777777;
           font-size: 13px;
         }
 
-        .arrow {
+        .card-arrow {
           color: #d2ad5b;
-          font-size: 30px;
+          font-size: 31px;
           font-weight: 700;
         }
 
         /* =========================
-           DASHBOARD CARDS
+           FLEET CARDS
         ========================= */
 
-        .cards-grid {
+        .fleet-grid {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
-          gap: 18px;
+          gap: 20px;
         }
 
-        .dashboard-card {
+        .fleet-card {
           display: block;
+
+          min-height: 165px;
+
+          padding: 25px;
+
           background: #151515;
-          border: 1px solid #363636;
+          border: 1px solid #383838;
           border-radius: 19px;
-          padding: 27px;
+
           color: white;
           text-decoration: none;
+
           transition: all 0.2s ease;
         }
 
-        .dashboard-card:hover {
-          border-color: #c9a24a;
-          background: #1a1a1a;
+        .fleet-card:hover {
+          background: #1b1b1b;
+          border-color: #d2ad5b;
           transform: translateY(-3px);
-          box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+
+          box-shadow:
+            0 12px 30px rgba(0, 0, 0, 0.35);
         }
 
-        .card-icon {
+        .fleet-icon {
           width: 46px;
           height: 46px;
+
           display: flex;
           align-items: center;
           justify-content: center;
-          border-radius: 12px;
+
           background: #211d14;
-          border: 1px solid #5a4823;
+          border: 1px solid #5c4923;
+          border-radius: 12px;
+
           font-size: 21px;
+
           margin-bottom: 20px;
         }
 
-        .dashboard-card h3 {
+        .fleet-card h3 {
           margin: 0 0 13px;
-          color: #e9e9e9;
           font-size: 18px;
+          color: #eeeeee;
         }
 
-        .card-count {
+        .fleet-count {
           color: #d2ad5b;
-          font-size: 39px;
+          font-size: 38px;
           font-weight: 900;
           line-height: 1;
           margin-bottom: 8px;
         }
 
-        .card-label {
+        .fleet-text {
           color: #777777;
           font-size: 13px;
         }
 
         /* =========================
-           QUICK ACTION BUTTONS
+           QUICK ACTIONS
         ========================= */
 
-        .quick-actions {
+        .actions {
           display: flex;
           flex-wrap: wrap;
-          gap: 12px;
+          gap: 13px;
         }
 
-        .quick-actions a {
+        .action-button {
           display: inline-flex;
           align-items: center;
           justify-content: center;
           gap: 9px;
 
-          background: #c9a24a;
-          border: 1px solid #c9a24a;
+          min-height: 48px;
+
+          padding: 0 21px;
+
+          background: #d2ad5b;
+          color: #080808;
+
+          border: 1px solid #d2ad5b;
           border-radius: 11px;
 
-          padding: 14px 20px;
-
-          color: #0a0a0a;
           text-decoration: none;
 
-          font-weight: 800;
           font-size: 14px;
+          font-weight: 900;
 
           box-shadow:
-            0 4px 14px rgba(0, 0, 0, 0.25);
+            0 5px 15px rgba(0, 0, 0, 0.3);
 
           transition: all 0.2s ease;
         }
 
-        .quick-actions a:hover {
-          background: #e0bd67;
-          border-color: #e0bd67;
-          color: #080808;
+        .action-button:hover {
+          background: #e4c574;
+          border-color: #e4c574;
 
-          transform: translateY(-2px);
+          transform: translateY(-3px);
 
           box-shadow:
-            0 8px 22px rgba(201, 162, 74, 0.20);
+            0 10px 25px rgba(210, 173, 91, 0.18);
         }
 
-        .quick-actions span {
-          color: #0a0a0a;
+        .action-icon {
+          font-size: 17px;
           font-weight: 900;
         }
 
@@ -701,12 +771,14 @@ export default function AdminDashboard() {
            ERROR
         ========================= */
 
-        .error-box {
-          background: #241414;
-          color: #e5aaaa;
-          border: 1px solid #572929;
+        .error {
+          background: #291616;
+          border: 1px solid #5c2929;
+          color: #e3aaaa;
+
           padding: 15px 18px;
           border-radius: 12px;
+
           margin-bottom: 25px;
         }
 
@@ -714,12 +786,12 @@ export default function AdminDashboard() {
            FOOTER
         ========================= */
 
-        .dashboard-footer {
+        .footer {
           display: flex;
           justify-content: space-between;
           align-items: center;
 
-          margin-top: 65px;
+          margin-top: 75px;
           padding-top: 25px;
 
           border-top: 1px solid #292929;
@@ -728,45 +800,41 @@ export default function AdminDashboard() {
           font-size: 13px;
         }
 
-        .footer-brand {
+        .footer div {
           display: flex;
           align-items: center;
           gap: 12px;
         }
 
-        .footer-brand strong {
-          color: #c9a24a;
+        .footer strong {
+          color: #d2ad5b;
           letter-spacing: 2px;
-        }
-
-        .footer-brand span {
-          color: #666666;
         }
 
         /* =========================
            TABLET
         ========================= */
 
-        @media (max-width: 850px) {
+        @media (max-width: 900px) {
 
-          .admin-page {
-            padding: 30px 20px;
+          .dashboard {
+            padding: 35px 25px;
           }
 
           .header {
             flex-direction: column;
           }
 
-          h1 {
-            font-size: 42px;
-          }
-
           .communication-grid {
             grid-template-columns: 1fr;
           }
 
-          .cards-grid {
-            grid-template-columns: 1fr 1fr;
+          .fleet-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+
+          h1 {
+            font-size: 44px;
           }
 
         }
@@ -777,15 +845,15 @@ export default function AdminDashboard() {
 
         @media (max-width: 600px) {
 
-          .admin-page {
+          .dashboard {
             padding: 25px 16px;
           }
 
           h1 {
-            font-size: 36px;
+            font-size: 37px;
           }
 
-          .cards-grid {
+          .fleet-grid {
             grid-template-columns: 1fr;
           }
 
@@ -793,16 +861,16 @@ export default function AdminDashboard() {
             padding: 20px;
           }
 
-          .quick-actions {
+          .actions {
             flex-direction: column;
           }
 
-          .quick-actions a {
+          .action-button {
             width: 100%;
             box-sizing: border-box;
           }
 
-          .dashboard-footer {
+          .footer {
             flex-direction: column;
             align-items: flex-start;
             gap: 12px;
@@ -815,25 +883,30 @@ export default function AdminDashboard() {
   );
 }
 
+/* =========================
+   DASHBOARD CARD
+========================= */
+
 function DashboardCard({
   href,
   icon,
   title,
   count,
-  label,
+  text,
 }: {
   href: string;
   icon: string;
   title: string;
   count: number;
-  label: string;
+  text: string;
 }) {
   return (
     <Link
       href={href}
-      className="dashboard-card"
+      className="fleet-card"
     >
-      <div className="card-icon">
+
+      <div className="fleet-icon">
         {icon}
       </div>
 
@@ -841,13 +914,41 @@ function DashboardCard({
         {title}
       </h3>
 
-      <div className="card-count">
+      <div className="fleet-count">
         {count}
       </div>
 
-      <div className="card-label">
-        {label}
+      <div className="fleet-text">
+        {text}
       </div>
+
+    </Link>
+  );
+}
+
+/* =========================
+   ACTION BUTTON
+========================= */
+
+function ActionButton({
+  href,
+  icon,
+  text,
+}: {
+  href: string;
+  icon: string;
+  text: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="action-button"
+    >
+      <span className="action-icon">
+        {icon}
+      </span>
+
+      {text}
     </Link>
   );
 }
