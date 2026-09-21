@@ -60,20 +60,26 @@ export default function AdminDashboard() {
       messages,
       notifications,
     ] = await Promise.all([
-      supabase.from("driver").select("id", {
-        count: "exact",
-        head: true,
-      }),
+      supabase
+        .from("driver")
+        .select("id", {
+          count: "exact",
+          head: true,
+        }),
 
-      supabase.from("vehicle").select("id", {
-        count: "exact",
-        head: true,
-      }),
+      supabase
+        .from("vehicle")
+        .select("id", {
+          count: "exact",
+          head: true,
+        }),
 
-      supabase.from("applications").select("id", {
-        count: "exact",
-        head: true,
-      }),
+      supabase
+        .from("applications")
+        .select("id", {
+          count: "exact",
+          head: true,
+        }),
 
       supabase
         .from("payments")
@@ -128,7 +134,9 @@ export default function AdminDashboard() {
     ].some(Boolean);
 
     if (hasError) {
-      setError("Een deel van het dashboard kon niet worden geladen.");
+      setError(
+        "Een deel van het dashboard kon niet worden geladen."
+      );
     }
 
     setCounts({
@@ -160,7 +168,7 @@ export default function AdminDashboard() {
           }
 
           .loading {
-            color: #a47a25;
+            color: #b18732;
             font-size: 18px;
           }
         `}</style>
@@ -174,9 +182,10 @@ export default function AdminDashboard() {
 
         {/* HEADER */}
 
-        <header className="header">
+        <header className="dashboard-header">
 
-          <div>
+          <div className="header-content">
+
             <div className="brand">
               IMPERIAL CABS
             </div>
@@ -188,6 +197,7 @@ export default function AdminDashboard() {
             <p>
               Beheer je volledige taxi fleet vanuit één omgeving.
             </p>
+
           </div>
 
           <div className="system-status">
@@ -198,16 +208,16 @@ export default function AdminDashboard() {
         </header>
 
         {error && (
-          <div className="error">
+          <div className="error-box">
             {error}
           </div>
         )}
 
         {/* COMMUNICATIE */}
 
-        <section className="section">
+        <section className="dashboard-section communication-section">
 
-          <div className="section-header">
+          <div className="section-heading">
 
             <div>
               <div className="section-label">
@@ -231,11 +241,13 @@ export default function AdminDashboard() {
               href="/admin/messages"
               className="communication-card"
             >
+
               <div className="communication-icon">
                 💬
               </div>
 
-              <div className="communication-text">
+              <div className="communication-content">
+
                 <span>
                   Ongelezen berichten
                 </span>
@@ -247,18 +259,26 @@ export default function AdminDashboard() {
                 <small>
                   Bekijk alle berichten →
                 </small>
+
               </div>
+
+              <div className="communication-arrow">
+                →
+              </div>
+
             </Link>
 
             <Link
               href="/admin/notifications"
               className="communication-card"
             >
+
               <div className="communication-icon">
                 🔔
               </div>
 
-              <div className="communication-text">
+              <div className="communication-content">
+
                 <span>
                   Ongelezen notificaties
                 </span>
@@ -270,7 +290,13 @@ export default function AdminDashboard() {
                 <small>
                   Bekijk alle notificaties →
                 </small>
+
               </div>
+
+              <div className="communication-arrow">
+                →
+              </div>
+
             </Link>
 
           </div>
@@ -279,11 +305,12 @@ export default function AdminDashboard() {
 
         {/* FLEET MANAGEMENT */}
 
-        <section className="section">
+        <section className="dashboard-section">
 
-          <div className="section-header">
+          <div className="section-heading">
 
             <div>
+
               <div className="section-label">
                 FLEET MANAGEMENT
               </div>
@@ -295,6 +322,7 @@ export default function AdminDashboard() {
               <p>
                 Belangrijkste onderdelen van Imperial Cabs.
               </p>
+
             </div>
 
           </div>
@@ -355,11 +383,12 @@ export default function AdminDashboard() {
 
         {/* SNELLE ACTIES */}
 
-        <section className="section">
+        <section className="dashboard-section quick-section">
 
-          <div className="section-header">
+          <div className="section-heading">
 
             <div>
+
               <div className="section-label">
                 SNELLE ACTIES
               </div>
@@ -371,11 +400,12 @@ export default function AdminDashboard() {
               <p>
                 Veelgebruikte acties direct openen.
               </p>
+
             </div>
 
           </div>
 
-          <div className="actions">
+          <div className="actions-grid">
 
             <ActionButton
               href="/admin/drivers/new"
@@ -415,16 +445,22 @@ export default function AdminDashboard() {
 
         {/* FOOTER */}
 
-        <footer className="footer">
+        <footer className="dashboard-footer">
 
-          <div>
+          <div className="footer-left">
+
             <strong>
               IMPERIAL CABS
             </strong>
 
+            <span className="footer-divider">
+              |
+            </span>
+
             <span>
               Taxi Fleet Management
             </span>
+
           </div>
 
           <span>
@@ -435,39 +471,35 @@ export default function AdminDashboard() {
 
       </div>
 
-      <style jsx>{`
+      <style jsx global>{`
 
-        /* =========================
-           BASIS
-        ========================= */
+        * {
+          box-sizing: border-box;
+        }
 
         .dashboard {
           min-height: 100vh;
           background: #f7f6f3;
           color: #171717;
-          padding: 50px;
+          padding: 55px 40px;
         }
 
         .dashboard-container {
-          max-width: 1200px;
+          width: 100%;
+          max-width: 1220px;
           margin: 0 auto;
         }
 
-        .loading {
-          color: #a47a25;
-          font-size: 18px;
-        }
-
-        /* =========================
+        /* ==============================
            HEADER
-        ========================= */
+        ============================== */
 
-        .header {
+        .dashboard-header {
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
           gap: 30px;
-          margin-bottom: 60px;
+          margin-bottom: 55px;
         }
 
         .brand {
@@ -475,18 +507,19 @@ export default function AdminDashboard() {
           font-size: 13px;
           font-weight: 900;
           letter-spacing: 4px;
-          margin-bottom: 14px;
+          margin-bottom: 15px;
         }
 
-        h1 {
+        .dashboard-header h1 {
           margin: 0;
           color: #151515;
           font-size: 52px;
           line-height: 1;
           letter-spacing: -2px;
+          font-weight: 800;
         }
 
-        .header p {
+        .dashboard-header p {
           margin: 14px 0 0;
           color: #777;
           font-size: 17px;
@@ -497,16 +530,19 @@ export default function AdminDashboard() {
           align-items: center;
           gap: 9px;
 
-          background: #181818;
+          background: #171717;
           color: white;
 
-          padding: 12px 17px;
+          padding: 13px 18px;
           border-radius: 30px;
 
           font-size: 13px;
           font-weight: 700;
 
           white-space: nowrap;
+
+          box-shadow:
+            0 5px 15px rgba(0, 0, 0, 0.12);
         }
 
         .status-dot {
@@ -514,17 +550,23 @@ export default function AdminDashboard() {
           height: 8px;
           border-radius: 50%;
           background: #d2ad5b;
+          box-shadow:
+            0 0 10px rgba(210, 173, 91, 0.7);
         }
 
-        /* =========================
+        /* ==============================
            SECTIONS
-        ========================= */
+        ============================== */
 
-        .section {
-          margin-top: 55px;
+        .dashboard-section {
+          margin-top: 52px;
         }
 
-        .section-header {
+        .communication-section {
+          margin-top: 0;
+        }
+
+        .section-heading {
           margin-bottom: 22px;
         }
 
@@ -533,24 +575,26 @@ export default function AdminDashboard() {
           font-size: 11px;
           font-weight: 900;
           letter-spacing: 3px;
-          margin-bottom: 7px;
+          margin-bottom: 8px;
         }
 
-        .section-header h2 {
+        .section-heading h2 {
           margin: 0;
           color: #171717;
           font-size: 27px;
+          line-height: 1.15;
+          font-weight: 800;
         }
 
-        .section-header p {
+        .section-heading p {
           margin: 7px 0 0;
           color: #777;
           font-size: 15px;
         }
 
-        /* =========================
-           COMMUNICATIE
-        ========================= */
+        /* ==============================
+           COMMUNICATION
+        ============================== */
 
         .communication-grid {
           display: grid;
@@ -563,24 +607,34 @@ export default function AdminDashboard() {
           align-items: center;
           gap: 20px;
 
-          min-height: 125px;
-          padding: 25px;
+          min-height: 130px;
 
-          background: #181818;
-          border: 1px solid #181818;
-          border-radius: 20px;
+          padding: 24px 25px;
+
+          background: #171717;
+
+          border: 1px solid #171717;
+          border-radius: 17px;
 
           color: white;
           text-decoration: none;
 
-          transition: all 0.2s ease;
+          box-shadow:
+            0 8px 25px rgba(0, 0, 0, 0.08);
+
+          transition:
+            transform 0.2s ease,
+            box-shadow 0.2s ease,
+            border-color 0.2s ease;
         }
 
         .communication-card:hover {
-          background: #242424;
-          border-color: #c9a24a;
           transform: translateY(-3px);
-          box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+
+          border-color: #c9a24a;
+
+          box-shadow:
+            0 14px 32px rgba(0, 0, 0, 0.15);
         }
 
         .communication-icon {
@@ -592,135 +646,217 @@ export default function AdminDashboard() {
           align-items: center;
           justify-content: center;
 
-          background: #2a2418;
-          border: 1px solid #6a5325;
-          border-radius: 15px;
+          background: #282117;
 
-          font-size: 24px;
+          border: 1px solid #6a5426;
+          border-radius: 14px;
+
+          font-size: 25px;
         }
 
-        .communication-text {
+        .communication-content {
           flex: 1;
         }
 
-        .communication-text span {
+        .communication-content span {
           display: block;
+
           color: #bdbdbd;
+
           font-size: 13px;
-          margin-bottom: 6px;
+          font-weight: 600;
+
+          margin-bottom: 5px;
         }
 
-        .communication-text strong {
+        .communication-content strong {
           display: block;
+
           color: #d2ad5b;
+
           font-size: 36px;
           line-height: 1;
+
           margin-bottom: 7px;
+
+          font-weight: 900;
         }
 
-        .communication-text small {
-          color: #dddddd;
+        .communication-content small {
+          color: #d5d5d5;
           font-size: 13px;
           font-weight: 600;
         }
 
-        /* =========================
+        .communication-arrow {
+          width: 42px;
+          height: 42px;
+
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          background: #d2ad5b;
+          color: #111;
+
+          border-radius: 50%;
+
+          font-size: 23px;
+          font-weight: 900;
+        }
+
+        /* ==============================
            FLEET CARDS
-        ========================= */
+        ============================== */
 
         .fleet-grid {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
-          gap: 20px;
+          gap: 18px;
         }
 
         .fleet-card {
-          display: block;
+          position: relative;
 
-          min-height: 165px;
-          padding: 26px;
+          display: flex;
+          flex-direction: column;
+
+          min-height: 175px;
+
+          padding: 22px;
 
           background: #ffffff;
+
           border: 1px solid #dedbd4;
-          border-radius: 19px;
+          border-radius: 17px;
 
           color: #171717;
           text-decoration: none;
 
-          transition: all 0.2s ease;
+          box-shadow:
+            0 3px 12px rgba(0, 0, 0, 0.035);
 
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.025);
+          transition:
+            transform 0.2s ease,
+            border-color 0.2s ease,
+            box-shadow 0.2s ease;
         }
 
         .fleet-card:hover {
-          border-color: #b18732;
           transform: translateY(-3px);
 
+          border-color: #c6a75e;
+
           box-shadow:
-            0 10px 25px rgba(0, 0, 0, 0.08),
-            0 0 0 1px rgba(177, 135, 50, 0.15);
+            0 12px 28px rgba(0, 0, 0, 0.09);
         }
 
         .fleet-icon {
-          width: 47px;
-          height: 47px;
+          width: 48px;
+          height: 48px;
 
           display: flex;
           align-items: center;
           justify-content: center;
 
-          background: #f5f0e5;
-          border: 1px solid #ded0ad;
+          background: #f5efe1;
+
+          border: 1px solid #e4d5b1;
           border-radius: 12px;
 
-          font-size: 21px;
+          font-size: 22px;
 
-          margin-bottom: 19px;
+          margin-bottom: 17px;
         }
 
         .fleet-card h3 {
-          margin: 0 0 12px;
+          margin: 0 0 8px;
 
           color: #171717;
+
           font-size: 18px;
+          font-weight: 800;
         }
 
         .fleet-count {
           color: #a47a25;
-          font-size: 38px;
-          font-weight: 900;
+
+          font-size: 37px;
           line-height: 1;
-          margin-bottom: 8px;
+
+          font-weight: 900;
+
+          margin-bottom: 7px;
         }
 
         .fleet-text {
           color: #777;
+
           font-size: 13px;
         }
 
-        /* =========================
-           SNELLE ACTIES
-        ========================= */
+        .fleet-card::after {
+          content: "→";
 
-        .actions {
+          position: absolute;
+
+          right: 18px;
+          top: 50%;
+
+          transform: translateY(-50%);
+
+          width: 36px;
+          height: 36px;
+
           display: flex;
-          flex-wrap: wrap;
-          gap: 12px;
+          align-items: center;
+          justify-content: center;
+
+          background: #f7f0df;
+
+          color: #a47a25;
+
+          border-radius: 50%;
+
+          font-size: 20px;
+          font-weight: 800;
+
+          opacity: 0.9;
+        }
+
+        /* ==============================
+           QUICK ACTIONS
+        ============================== */
+
+        .quick-section {
+          margin-top: 58px;
+        }
+
+        .actions-grid {
+          display: grid;
+
+          grid-template-columns:
+            repeat(5, minmax(0, 1fr));
+
+          gap: 14px;
         }
 
         .action-button {
-          display: inline-flex;
+          min-height: 54px;
+
+          display: flex;
           align-items: center;
           justify-content: center;
+
           gap: 9px;
 
-          min-height: 48px;
-          padding: 0 21px;
+          padding: 0 16px;
 
-          background: #181818;
-          color: #ffffff;
+          background: #171717;
 
-          border: 1px solid #181818;
+          color: white;
+
+          border: 1px solid #171717;
           border-radius: 11px;
 
           text-decoration: none;
@@ -728,96 +864,134 @@ export default function AdminDashboard() {
           font-size: 14px;
           font-weight: 800;
 
-          transition: all 0.2s ease;
+          box-shadow:
+            0 5px 15px rgba(0, 0, 0, 0.08);
+
+          transition:
+            transform 0.2s ease,
+            background 0.2s ease,
+            border-color 0.2s ease,
+            box-shadow 0.2s ease;
         }
 
         .action-button:hover {
-          background: #000000;
-          border-color: #c9a24a;
-          color: #ffffff;
-
           transform: translateY(-2px);
 
+          background: #000000;
+
+          border-color: #c9a24a;
+
           box-shadow:
-            0 8px 20px rgba(0, 0, 0, 0.12);
+            0 8px 20px rgba(0, 0, 0, 0.14);
         }
 
         .action-button.primary {
-          background: #c9a24a;
+          background: #d2ad5b;
           color: #111111;
-          border-color: #c9a24a;
+          border-color: #d2ad5b;
         }
 
         .action-button.primary:hover {
-          background: #dfbd68;
-          border-color: #dfbd68;
-          color: #111111;
+          background: #e0bd67;
+          border-color: #e0bd67;
 
           box-shadow:
-            0 8px 22px rgba(174, 132, 39, 0.25);
+            0 8px 22px rgba(177, 135, 50, 0.22);
         }
 
         .action-icon {
-          font-size: 17px;
+          font-size: 18px;
           font-weight: 900;
         }
 
-        /* =========================
+        /* ==============================
            ERROR
-        ========================= */
+        ============================== */
 
-        .error {
-          background: #fff1f1;
-          border: 1px solid #e5c5c5;
-          color: #9b3838;
+        .error-box {
+          background: #fff2f2;
+
+          border: 1px solid #e6caca;
+
+          color: #9b3d3d;
 
           padding: 15px 18px;
-          border-radius: 12px;
+
+          border-radius: 11px;
 
           margin-bottom: 25px;
         }
 
-        /* =========================
+        /* ==============================
            FOOTER
-        ========================= */
+        ============================== */
 
-        .footer {
+        .dashboard-footer {
           display: flex;
+
           justify-content: space-between;
           align-items: center;
 
-          margin-top: 70px;
-          padding-top: 25px;
+          margin-top: 65px;
 
-          border-top: 1px solid #ddd9d1;
+          padding-top: 24px;
+
+          border-top: 1px solid #dedbd4;
 
           color: #777;
+
           font-size: 13px;
         }
 
-        .footer div {
+        .footer-left {
           display: flex;
           align-items: center;
           gap: 12px;
         }
 
-        .footer strong {
+        .footer-left strong {
           color: #b18732;
           letter-spacing: 2px;
         }
 
-        /* =========================
+        .footer-divider {
+          color: #bbb;
+        }
+
+        /* ==============================
            TABLET
-        ========================= */
+        ============================== */
 
-        @media (max-width: 900px) {
+        @media (max-width: 1000px) {
 
-          .dashboard {
-            padding: 35px 25px;
+          .actions-grid {
+            grid-template-columns:
+              repeat(3, 1fr);
           }
 
-          .header {
+          .fleet-grid {
+            grid-template-columns:
+              repeat(2, 1fr);
+          }
+
+        }
+
+        /* ==============================
+           MOBILE
+        ============================== */
+
+        @media (max-width: 700px) {
+
+          .dashboard {
+            padding: 30px 18px;
+          }
+
+          .dashboard-header {
             flex-direction: column;
+          }
+
+          .dashboard-header h1 {
+            font-size: 40px;
           }
 
           .communication-grid {
@@ -825,47 +999,14 @@ export default function AdminDashboard() {
           }
 
           .fleet-grid {
-            grid-template-columns: repeat(2, 1fr);
-          }
-
-          h1 {
-            font-size: 44px;
-          }
-
-        }
-
-        /* =========================
-           MOBILE
-        ========================= */
-
-        @media (max-width: 600px) {
-
-          .dashboard {
-            padding: 25px 16px;
-          }
-
-          h1 {
-            font-size: 37px;
-          }
-
-          .fleet-grid {
             grid-template-columns: 1fr;
           }
 
-          .communication-card {
-            padding: 20px;
+          .actions-grid {
+            grid-template-columns: 1fr;
           }
 
-          .actions {
-            flex-direction: column;
-          }
-
-          .action-button {
-            width: 100%;
-            box-sizing: border-box;
-          }
-
-          .footer {
+          .dashboard-footer {
             flex-direction: column;
             align-items: flex-start;
             gap: 12px;
@@ -877,6 +1018,10 @@ export default function AdminDashboard() {
     </main>
   );
 }
+
+/* =========================================
+   FLEET CARD
+========================================= */
 
 function DashboardCard({
   href,
@@ -896,6 +1041,7 @@ function DashboardCard({
       href={href}
       className="fleet-card"
     >
+
       <div className="fleet-icon">
         {icon}
       </div>
@@ -911,9 +1057,14 @@ function DashboardCard({
       <div className="fleet-text">
         {text}
       </div>
+
     </Link>
   );
 }
+
+/* =========================================
+   ACTION BUTTON
+========================================= */
 
 function ActionButton({
   href,
@@ -933,11 +1084,15 @@ function ActionButton({
         primary ? "primary" : ""
       }`}
     >
+
       <span className="action-icon">
         {icon}
       </span>
 
-      {text}
+      <span>
+        {text}
+      </span>
+
     </Link>
   );
 }
