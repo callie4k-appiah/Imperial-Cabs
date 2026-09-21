@@ -32,6 +32,9 @@ export default function DocumentDetailPage() {
   const [driver, setDriver] =
     useState<Driver | null>(null);
 
+  const [signedUrl, setSignedUrl] =
+    useState<string | null>(null);
+
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState("");
@@ -66,16 +69,34 @@ export default function DocumentDetailPage() {
       if (documentData.driver_id) {
         const { data: driverData } = await supabase
           .from("driver")
-          .select(
-            "id, full_name, phone, email"
-          )
-          .eq(
-            "id",
-            documentData.driver_id
-          )
+          .select("id, full_name, phone, email")
+          .eq("id", documentData.driver_id)
           .single();
 
         setDriver(driverData);
+      }
+
+      /*
+       * Maak een tijdelijke beveiligde URL
+       * voor het privé opgeslagen bestand.
+       */
+      if (documentData.file_url) {
+        const { data, error: signedUrlError } =
+          await supabase.storage
+            .from("documents")
+            .createSignedUrl(
+              documentData.file_url,
+              60 * 30
+            );
+
+        if (signedUrlError) {
+          console.error(signedUrlError);
+          setError(
+            "Het document kon niet worden geladen."
+          );
+        } else {
+          setSignedUrl(data.signedUrl);
+        }
       }
 
       setLoading(false);
@@ -175,24 +196,36 @@ export default function DocumentDetailPage() {
     if (!date) return false;
 
     const today = new Date();
-
-    today.setHours(
-      0,
-      0,
-      0,
-      0
-    );
+    today.setHours(0, 0, 0, 0);
 
     const expiry = new Date(date);
-
-    expiry.setHours(
-      0,
-      0,
-      0,
-      0
-    );
+    expiry.setHours(0, 0, 0, 0);
 
     return expiry < today;
+  }
+
+  function getFileType() {
+    if (!document?.file_url) {
+      return "unknown";
+    }
+
+    const path =
+      document.file_url.toLowerCase();
+
+    if (path.endsWith(".pdf")) {
+      return "pdf";
+    }
+
+    if (
+      path.endsWith(".jpg") ||
+      path.endsWith(".jpeg") ||
+      path.endsWith(".png") ||
+      path.endsWith(".webp")
+    ) {
+      return "image";
+    }
+
+    return "unknown";
   }
 
   async function updateStatus(
@@ -229,37 +262,6 @@ export default function DocumentDetailPage() {
     setUpdating(false);
   }
 
-  async function openDocument() {
-    if (!document?.file_url) {
-      setError("Er is geen bestand gekoppeld.");
-      return;
-    }
-
-    const { data, error } =
-      await supabase.storage
-        .from("documents")
-        .createSignedUrl(
-          document.file_url,
-          60 * 10
-        );
-
-    if (error || !data?.signedUrl) {
-      console.error(error);
-
-      setError(
-        "Het document kon niet worden geopend."
-      );
-
-      return;
-    }
-
-    window.open(
-      data.signedUrl,
-      "_blank",
-      "noopener,noreferrer"
-    );
-  }
-
   async function deleteDocument() {
     if (!document) return;
 
@@ -272,9 +274,6 @@ export default function DocumentDetailPage() {
     setUpdating(true);
     setError("");
 
-    /*
-     * Eerst Storage-bestand verwijderen.
-     */
     if (document.file_url) {
       const { error: storageError } =
         await supabase.storage
@@ -288,9 +287,6 @@ export default function DocumentDetailPage() {
       }
     }
 
-    /*
-     * Daarna database record verwijderen.
-     */
     const { error: deleteError } =
       await supabase
         .from("documents")
@@ -321,11 +317,10 @@ export default function DocumentDetailPage() {
     );
   }
 
-  if (error && !document) {
+  if (!document) {
     return (
       <main className="page">
         <div className="container">
-
           <button
             className="back"
             onClick={() =>
@@ -339,29 +334,23 @@ export default function DocumentDetailPage() {
 
           <div className="error-card">
             <h1>Document niet gevonden</h1>
-
             <p>{error}</p>
           </div>
-
         </div>
       </main>
     );
   }
 
-  if (!document) {
-    return null;
-  }
+  const expired = isExpired(
+    document.expiry_date
+  );
 
-  const expired =
-    isExpired(
-      document.expiry_date
-    );
+  const fileType = getFileType();
 
   return (
     <main className="page">
       <div className="container">
 
-        {/* BACK */}
         <button
           className="back"
           onClick={() =>
@@ -409,7 +398,6 @@ export default function DocumentDetailPage() {
 
         </div>
 
-        {/* ERROR */}
         {error && (
           <div className="error">
             {error}
@@ -418,10 +406,11 @@ export default function DocumentDetailPage() {
 
         <div className="grid">
 
-          {/* DOCUMENT */}
+          {/* DOCUMENT VIEWER */}
           <section className="card document-card">
 
             <div className="card-header">
+
               <div>
                 <span className="label">
                   DOCUMENT
@@ -437,52 +426,72 @@ export default function DocumentDetailPage() {
               <div className="file-icon">
                 📄
               </div>
+
             </div>
 
-            <div className="document-preview">
+            <div className="document-viewer">
 
-              {document.file_url ? (
-                <>
+              {!signedUrl ? (
+                <div className="viewer-loading">
+                  <div className="spinner" />
+
+                  <strong>
+                    Document laden...
+                  </strong>
+                </div>
+              ) : fileType === "pdf" ? (
+                <iframe
+                  src={signedUrl}
+                  className="pdf-viewer"
+                  title="Document bekijken"
+                />
+              ) : fileType === "image" ? (
+                <img
+                  src={signedUrl}
+                  className="image-viewer"
+                  alt="Document"
+                />
+              ) : (
+                <div className="viewer-loading">
                   <div className="preview-icon">
                     📄
                   </div>
 
                   <strong>
-                    Document beschikbaar
+                    Voorbeeld niet beschikbaar
                   </strong>
 
-                  <span>
-                    Het bestand is veilig
-                    opgeslagen in
-                    Supabase Storage.
-                  </span>
-
-                  <button
-                    className="open-button"
-                    onClick={openDocument}
-                  >
-                    Bekijk document →
-                  </button>
-                </>
-              ) : (
-                <>
-                  <div className="preview-icon">
-                    ⚠
-                  </div>
-
-                  <strong>
-                    Geen bestand
-                  </strong>
-
-                  <span>
-                    Er is geen bestand
-                    gekoppeld aan dit
-                    document.
-                  </span>
-                </>
+                  <p>
+                    Gebruik de knop hieronder
+                    om het bestand te openen.
+                  </p>
+                </div>
               )}
 
             </div>
+
+            {signedUrl && (
+              <div className="viewer-actions">
+
+                <a
+                  href={signedUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="open-button"
+                >
+                  Open in nieuw venster ↗
+                </a>
+
+                <a
+                  href={signedUrl}
+                  download
+                  className="download-button"
+                >
+                  ↓ Download document
+                </a>
+
+              </div>
+            )}
 
           </section>
 
@@ -648,9 +657,8 @@ export default function DocumentDetailPage() {
             </strong>
 
             <p>
-              Het bestand en de
-              registratie worden
-              permanent verwijderd.
+              Het bestand en de registratie
+              worden permanent verwijderd.
             </p>
           </div>
 
@@ -690,8 +698,12 @@ export default function DocumentDetailPage() {
           cursor: pointer;
         }
 
-        .back:hover {
-          color: #000;
+        .eyebrow {
+          color: #b08a3e;
+          font-size: 12px;
+          font-weight: 800;
+          letter-spacing: 2px;
+          margin-bottom: 8px;
         }
 
         .header {
@@ -700,14 +712,6 @@ export default function DocumentDetailPage() {
           align-items: flex-end;
           gap: 25px;
           margin-bottom: 30px;
-        }
-
-        .eyebrow {
-          color: #b08a3e;
-          font-size: 12px;
-          font-weight: 800;
-          letter-spacing: 2px;
-          margin-bottom: 8px;
         }
 
         h1 {
@@ -760,17 +764,6 @@ export default function DocumentDetailPage() {
           font-weight: 600;
         }
 
-        .error-card {
-          background: white;
-          border: 1px solid #e7e4de;
-          border-radius: 18px;
-          padding: 35px;
-        }
-
-        .error-card h1 {
-          font-size: 28px;
-        }
-
         .grid {
           display: grid;
           grid-template-columns: 1fr 1fr;
@@ -820,48 +813,96 @@ export default function DocumentDetailPage() {
           font-size: 23px;
         }
 
-        .document-preview {
+        .document-viewer {
           margin-top: 22px;
-          min-height: 180px;
-          border: 2px dashed #ddd7ca;
+          min-height: 600px;
+          border: 1px solid #ddd7ca;
           border-radius: 14px;
-          background: #faf9f6;
+          background: #f2f1ee;
+          overflow: hidden;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .pdf-viewer {
+          width: 100%;
+          height: 700px;
+          border: none;
+          background: white;
+        }
+
+        .image-viewer {
+          display: block;
+          max-width: 100%;
+          max-height: 700px;
+          width: auto;
+          height: auto;
+          object-fit: contain;
+        }
+
+        .viewer-loading {
+          min-height: 300px;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
           text-align: center;
-          padding: 25px;
+          padding: 30px;
+        }
+
+        .viewer-loading strong {
+          margin-top: 12px;
+        }
+
+        .viewer-loading p {
+          color: #888;
+          font-size: 13px;
+        }
+
+        .spinner {
+          width: 30px;
+          height: 30px;
+          border: 3px solid #ddd;
+          border-top-color: #b08a3e;
+          border-radius: 50%;
+          animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+          to {
+            transform: rotate(360deg);
+          }
         }
 
         .preview-icon {
-          font-size: 32px;
-          margin-bottom: 10px;
+          font-size: 35px;
         }
 
-        .document-preview strong {
-          font-size: 15px;
+        .viewer-actions {
+          display: flex;
+          gap: 10px;
+          margin-top: 15px;
         }
 
-        .document-preview span {
-          color: #999;
+        .open-button,
+        .download-button {
+          display: inline-block;
+          text-decoration: none;
+          border-radius: 10px;
+          padding: 12px 17px;
           font-size: 13px;
-          margin-top: 6px;
+          font-weight: 700;
         }
 
         .open-button {
-          margin-top: 18px;
-          border: none;
           background: #171717;
           color: #d4af62;
-          border-radius: 10px;
-          padding: 12px 18px;
-          font-weight: 700;
-          cursor: pointer;
         }
 
-        .open-button:hover {
-          background: #292929;
+        .download-button {
+          background: #eee;
+          color: #333;
         }
 
         .details {
@@ -881,7 +922,6 @@ export default function DocumentDetailPage() {
           font-size: 11px;
           text-transform: uppercase;
           font-weight: 700;
-          letter-spacing: 0.6px;
         }
 
         .details strong {
@@ -905,10 +945,6 @@ export default function DocumentDetailPage() {
           cursor: pointer;
         }
 
-        .secondary-button:hover {
-          border-color: #b08a3e;
-        }
-
         .status-buttons {
           display: grid;
           gap: 9px;
@@ -926,7 +962,6 @@ export default function DocumentDetailPage() {
 
         .status-buttons button:disabled {
           opacity: 0.5;
-          cursor: not-allowed;
         }
 
         .approved-button {
@@ -956,10 +991,6 @@ export default function DocumentDetailPage() {
           gap: 20px;
         }
 
-        .danger-zone strong {
-          font-size: 14px;
-        }
-
         .danger-zone p {
           margin: 5px 0 0;
           color: #999;
@@ -974,11 +1005,13 @@ export default function DocumentDetailPage() {
           padding: 12px 16px;
           font-weight: 700;
           cursor: pointer;
-          white-space: nowrap;
         }
 
-        .delete-button:hover {
-          background: #f9dfd2;
+        .error-card {
+          background: white;
+          border: 1px solid #e7e4de;
+          border-radius: 18px;
+          padding: 30px;
         }
 
         @media (max-width: 700px) {
@@ -1001,6 +1034,23 @@ export default function DocumentDetailPage() {
 
           .document-card {
             grid-column: span 1;
+          }
+
+          .document-viewer {
+            min-height: 450px;
+          }
+
+          .pdf-viewer {
+            height: 550px;
+          }
+
+          .viewer-actions {
+            flex-direction: column;
+          }
+
+          .open-button,
+          .download-button {
+            text-align: center;
           }
 
           .danger-zone {
