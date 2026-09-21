@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../../../lib/supabase";
 
@@ -11,6 +11,7 @@ type Driver = {
 
 export default function NewDocumentPage() {
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [loading, setLoading] = useState(true);
@@ -19,9 +20,9 @@ export default function NewDocumentPage() {
 
   const [driverId, setDriverId] = useState("");
   const [documentType, setDocumentType] = useState("");
-  const [fileUrl, setFileUrl] = useState("");
   const [status, setStatus] = useState("pending");
   const [expiryDate, setExpiryDate] = useState("");
+  const [file, setFile] = useState<File | null>(null);
 
   useEffect(() => {
     async function loadDrivers() {
@@ -52,6 +53,60 @@ export default function NewDocumentPage() {
     loadDrivers();
   }, [router]);
 
+  function handleFileChange(
+    e: React.ChangeEvent<HTMLInputElement>
+  ) {
+    setError("");
+
+    const selectedFile = e.target.files?.[0];
+
+    if (!selectedFile) {
+      setFile(null);
+      return;
+    }
+
+    const allowedTypes = [
+      "application/pdf",
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+    ];
+
+    if (!allowedTypes.includes(selectedFile.type)) {
+      setError(
+        "Alleen PDF, JPG, PNG en WEBP bestanden zijn toegestaan."
+      );
+
+      e.target.value = "";
+      setFile(null);
+      return;
+    }
+
+    const maxSize = 10 * 1024 * 1024;
+
+    if (selectedFile.size > maxSize) {
+      setError(
+        "Het bestand mag maximaal 10 MB groot zijn."
+      );
+
+      e.target.value = "";
+      setFile(null);
+      return;
+    }
+
+    setFile(selectedFile);
+  }
+
+  function getFileExtension(file: File) {
+    const parts = file.name.split(".");
+
+    if (parts.length < 2) {
+      return "file";
+    }
+
+    return parts[parts.length - 1].toLowerCase();
+  }
+
   async function handleSubmit(
     e: React.FormEvent<HTMLFormElement>
   ) {
@@ -69,29 +124,137 @@ export default function NewDocumentPage() {
       return;
     }
 
-    setSaving(true);
-
-    const { error } = await supabase
-      .from("documents")
-      .insert({
-        driver_id: driverId,
-        document_type: documentType,
-        file_url: fileUrl || null,
-        status,
-        expiry_date: expiryDate || null,
-      });
-
-    if (error) {
-      console.error(error);
-      setError(
-        "Document kon niet worden opgeslagen: " +
-          error.message
-      );
-      setSaving(false);
+    if (!file) {
+      setError("Selecteer een document om te uploaden.");
       return;
     }
 
-    router.push("/admin/documents");
+    setSaving(true);
+
+    try {
+      /*
+       * Eerst maken we de database record.
+       */
+      const {
+        data: document,
+        error: documentError,
+      } = await supabase
+        .from("documents")
+        .insert({
+          driver_id: driverId,
+          document_type: documentType,
+          file_url: null,
+          status,
+          expiry_date: expiryDate || null,
+        })
+        .select()
+        .single();
+
+      if (documentError || !document) {
+        console.error(documentError);
+
+        throw new Error(
+          documentError?.message ||
+            "Document kon niet worden aangemaakt."
+        );
+      }
+
+      /*
+       * Veilige bestandsnaam.
+       */
+      const extension = getFileExtension(file);
+
+      const filePath =
+        `${driverId}/` +
+        `${document.id}-` +
+        `${crypto.randomUUID()}.` +
+        extension;
+
+      /*
+       * Upload naar Supabase Storage.
+       */
+      const {
+        error: uploadError,
+      } = await supabase.storage
+        .from("documents")
+        .upload(filePath, file, {
+          cacheControl: "3600",
+          upsert: false,
+          contentType: file.type,
+        });
+
+      if (uploadError) {
+        console.error(uploadError);
+
+        /*
+         * Database record opruimen als upload mislukt.
+         */
+        await supabase
+          .from("documents")
+          .delete()
+          .eq("id", document.id);
+
+        throw new Error(
+          "Upload mislukt: " +
+            uploadError.message
+        );
+      }
+
+      /*
+       * We bewaren het Storage path in file_url.
+       */
+      const { error: updateError } =
+        await supabase
+          .from("documents")
+          .update({
+            file_url: filePath,
+          })
+          .eq("id", document.id);
+
+      if (updateError) {
+        console.error(updateError);
+
+        /*
+         * Opruimen als database update mislukt.
+         */
+        await supabase.storage
+          .from("documents")
+          .remove([filePath]);
+
+        await supabase
+          .from("documents")
+          .delete()
+          .eq("id", document.id);
+
+        throw new Error(
+          "Document kon niet worden opgeslagen."
+        );
+      }
+
+      router.push("/admin/documents");
+    } catch (err) {
+      console.error(err);
+
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Er is iets misgegaan."
+      );
+
+      setSaving(false);
+    }
+  }
+
+  function formatFileSize(bytes: number) {
+    if (bytes < 1024) {
+      return `${bytes} B`;
+    }
+
+    if (bytes < 1024 * 1024) {
+      return `${(bytes / 1024).toFixed(1)} KB`;
+    }
+
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
   if (loading) {
@@ -126,8 +289,7 @@ export default function NewDocumentPage() {
             <h1>Nieuw document</h1>
 
             <p>
-              Voeg een document toe aan een
-              chauffeur.
+              Upload een document voor een chauffeur.
             </p>
           </div>
         </div>
@@ -244,7 +406,7 @@ export default function NewDocumentPage() {
             </select>
           </div>
 
-          {/* EXPIRY DATE */}
+          {/* EXPIRY */}
           <div className="field">
             <label>Vervaldatum</label>
 
@@ -262,23 +424,44 @@ export default function NewDocumentPage() {
             </small>
           </div>
 
-          {/* FILE URL */}
+          {/* FILE */}
           <div className="field">
-            <label>Document link</label>
+            <label>Document uploaden</label>
+
+            <div
+              className="upload-box"
+              onClick={() =>
+                fileInputRef.current?.click()
+              }
+            >
+              <div className="upload-icon">
+                ↑
+              </div>
+
+              <strong>
+                {file
+                  ? file.name
+                  : "Klik om een document te kiezen"}
+              </strong>
+
+              <span>
+                PDF, JPG, PNG of WEBP — maximaal 10 MB
+              </span>
+
+              {file && (
+                <small className="selected-file">
+                  {formatFileSize(file.size)}
+                </small>
+              )}
+            </div>
 
             <input
-              type="url"
-              placeholder="https://..."
-              value={fileUrl}
-              onChange={(e) =>
-                setFileUrl(e.target.value)
-              }
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,.jpg,.jpeg,.png,.webp"
+              onChange={handleFileChange}
+              hidden
             />
-
-            <small>
-              Voeg eventueel een link toe naar
-              het document.
-            </small>
           </div>
 
           {/* ERROR */}
@@ -288,7 +471,7 @@ export default function NewDocumentPage() {
             </div>
           )}
 
-          {/* BUTTONS */}
+          {/* ACTIONS */}
           <div className="actions">
 
             <button
@@ -297,6 +480,7 @@ export default function NewDocumentPage() {
               onClick={() =>
                 router.push("/admin/documents")
               }
+              disabled={saving}
             >
               Annuleren
             </button>
@@ -307,7 +491,7 @@ export default function NewDocumentPage() {
               disabled={saving}
             >
               {saving
-                ? "Opslaan..."
+                ? "Uploaden..."
                 : "Document opslaan →"}
             </button>
 
@@ -405,6 +589,58 @@ export default function NewDocumentPage() {
           font-size: 12px;
         }
 
+        .upload-box {
+          min-height: 170px;
+          border: 2px dashed #d8d2c6;
+          border-radius: 14px;
+          background: #faf9f6;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          padding: 25px;
+          box-sizing: border-box;
+          cursor: pointer;
+          transition: 0.15s ease;
+        }
+
+        .upload-box:hover {
+          border-color: #b08a3e;
+          background: #fcfaf4;
+        }
+
+        .upload-icon {
+          width: 48px;
+          height: 48px;
+          border-radius: 50%;
+          background: #f0eadc;
+          color: #9b762f;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 25px;
+          margin-bottom: 12px;
+        }
+
+        .upload-box strong {
+          font-size: 14px;
+          max-width: 100%;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .upload-box span {
+          color: #999;
+          font-size: 12px;
+          margin-top: 6px;
+        }
+
+        .selected-file {
+          color: #9b762f;
+          font-weight: 700;
+        }
+
         .error {
           background: #fff0e8;
           color: #9a4e24;
@@ -446,7 +682,8 @@ export default function NewDocumentPage() {
           background: #292929;
         }
 
-        .submit:disabled {
+        .submit:disabled,
+        .cancel:disabled {
           opacity: 0.6;
           cursor: not-allowed;
         }
