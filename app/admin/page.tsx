@@ -1,507 +1,563 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabase";
 
-type Stats = {
+type Counts = {
   drivers: number;
   vehicles: number;
   applications: number;
   payments: number;
   damages: number;
   maintenance: number;
+  unreadMessages: number;
+  unreadNotifications: number;
 };
 
 export default function AdminDashboard() {
   const router = useRouter();
 
-  const [email, setEmail] = useState("");
-  const [stats, setStats] = useState<Stats>({
+  const [counts, setCounts] = useState<Counts>({
     drivers: 0,
     vehicles: 0,
     applications: 0,
     payments: 0,
     damages: 0,
     maintenance: 0,
+    unreadMessages: 0,
+    unreadNotifications: 0,
   });
 
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    async function loadDashboard() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+    loadDashboard();
+  }, []);
 
-      if (!user) {
-        router.push("/admin/login");
-        return;
-      }
+  async function loadDashboard() {
+    setLoading(true);
+    setError("");
 
-      setEmail(user.email || "");
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-      const [
-        drivers,
-        vehicles,
-        applications,
-        payments,
-        damages,
-        maintenance,
-      ] = await Promise.all([
-        supabase
-          .from("driver")
-          .select("*", {
-            count: "exact",
-            head: true,
-          }),
-
-        supabase
-          .from("vehicle")
-          .select("*", {
-            count: "exact",
-            head: true,
-          }),
-
-        supabase
-          .from("applications")
-          .select("*", {
-            count: "exact",
-            head: true,
-          }),
-
-        supabase
-          .from("payments")
-          .select("*", {
-            count: "exact",
-            head: true,
-          }),
-
-        supabase
-          .from("damage_reports")
-          .select("*", {
-            count: "exact",
-            head: true,
-          }),
-
-        supabase
-          .from("maintenance")
-          .select("*", {
-            count: "exact",
-            head: true,
-          }),
-      ]);
-
-      setStats({
-        drivers: drivers.count || 0,
-        vehicles: vehicles.count || 0,
-        applications: applications.count || 0,
-        payments: payments.count || 0,
-        damages: damages.count || 0,
-        maintenance: maintenance.count || 0,
-      });
-
-      setLoading(false);
+    if (!user) {
+      router.push("/admin/login");
+      return;
     }
 
-    loadDashboard();
-  }, [router]);
+    const [
+      driversResult,
+      vehiclesResult,
+      applicationsResult,
+      paymentsResult,
+      damagesResult,
+      maintenanceResult,
+      messagesResult,
+      notificationsResult,
+    ] = await Promise.all([
+      supabase.from("driver").select("id", { count: "exact", head: true }),
 
-  async function logout() {
-    await supabase.auth.signOut();
-    router.push("/admin/login");
+      supabase
+        .from("vehicle")
+        .select("id", { count: "exact", head: true }),
+
+      supabase
+        .from("applications")
+        .select("id", { count: "exact", head: true }),
+
+      supabase
+        .from("payments")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "open"),
+
+      supabase
+        .from("damage_reports")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "open"),
+
+      supabase
+        .from("maintenance")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "open"),
+
+      supabase
+        .from("messages")
+        .select("id", { count: "exact", head: true })
+        .eq("is_read", false),
+
+      supabase
+        .from("notifications")
+        .select("id", { count: "exact", head: true })
+        .eq("is_read", false),
+    ]);
+
+    const errors = [
+      driversResult.error,
+      vehiclesResult.error,
+      applicationsResult.error,
+      paymentsResult.error,
+      damagesResult.error,
+      maintenanceResult.error,
+      messagesResult.error,
+      notificationsResult.error,
+    ].filter(Boolean);
+
+    if (errors.length > 0) {
+      setError("Een deel van het dashboard kon niet worden geladen.");
+    }
+
+    setCounts({
+      drivers: driversResult.count || 0,
+      vehicles: vehiclesResult.count || 0,
+      applications: applicationsResult.count || 0,
+      payments: paymentsResult.count || 0,
+      damages: damagesResult.count || 0,
+      maintenance: maintenanceResult.count || 0,
+      unreadMessages: messagesResult.count || 0,
+      unreadNotifications: notificationsResult.count || 0,
+    });
+
+    setLoading(false);
   }
-
-  const cards = [
-    {
-      title: "Chauffeurs",
-      value: stats.drivers,
-      description: "Beheer alle chauffeurs",
-      icon: "👤",
-      path: "/admin/drivers",
-    },
-    {
-      title: "Voertuigen",
-      value: stats.vehicles,
-      description: "Beheer je wagenpark",
-      icon: "🚗",
-      path: "/admin/vehicle",
-    },
-    {
-      title: "Nieuwe aanvragen",
-      value: stats.applications,
-      description: "Bekijk chauffeur-aanvragen",
-      icon: "📋",
-      path: "/admin/applications",
-    },
-    {
-      title: "Open betalingen",
-      value: stats.payments,
-      description: "Bekijk betalingen",
-      icon: "💰",
-      path: "/admin/payments",
-    },
-    {
-      title: "Open schades",
-      value: stats.damages,
-      description: "Bekijk schademeldingen",
-      icon: "🔧",
-      path: "/admin/damage-reports",
-    },
-    {
-      title: "Onderhoud",
-      value: stats.maintenance,
-      description: "Bekijk onderhoud",
-      icon: "🛠️",
-      path: "/admin/maintenance",
-    },
-  ];
 
   if (loading) {
     return (
-      <main
-        style={{
-          minHeight: "100vh",
-          background: "#050505",
-          color: "#fff",
-          padding: "40px",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: "1200px",
-            margin: "0 auto",
-          }}
-        >
-          <p style={{ color: "#999" }}>
-            Dashboard laden...
-          </p>
+      <main className="admin-page">
+        <div className="container">
+          <p>Dashboard laden...</p>
         </div>
       </main>
     );
   }
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        background: "#050505",
-        color: "#fff",
-        padding: "30px",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "1200px",
-          margin: "0 auto",
-        }}
-      >
-
-        {/* HEADER */}
-
-        <header
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: "20px",
-            marginBottom: "50px",
-            flexWrap: "wrap",
-          }}
-        >
+    <main className="admin-page">
+      <div className="container">
+        <header className="header">
           <div>
-            <h1
-              style={{
-                margin: 0,
-                fontSize: "32px",
-                fontWeight: 700,
-              }}
-            >
-              Imperial Cabs
-            </h1>
+            <div className="eyebrow">IMPERIAL CABS</div>
 
-            <p
-              style={{
-                marginTop: "6px",
-                color: "#999",
-              }}
-            >
-              Admin Dashboard
+            <h1>Admin Dashboard</h1>
+
+            <p>
+              Beheer chauffeurs, voertuigen en de dagelijkse
+              fleetactiviteiten.
             </p>
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "15px",
-            }}
-          >
-            <span
-              style={{
-                color: "#aaa",
-                fontSize: "14px",
-              }}
-            >
-              {email}
-            </span>
-
-            <button
-              type="button"
-              onClick={logout}
-              style={{
-                background: "#fff",
-                color: "#000",
-                border: "none",
-                borderRadius: "8px",
-                padding: "9px 14px",
-                cursor: "pointer",
-                fontWeight: 600,
-              }}
-            >
-              Uitloggen
-            </button>
           </div>
         </header>
 
-        {/* TITLE */}
+        {error && <div className="error-box">{error}</div>}
 
-        <div
-          style={{
-            marginBottom: "25px",
-          }}
-        >
-          <h2
-            style={{
-              margin: 0,
-              fontSize: "24px",
-            }}
-          >
-            Overzicht
-          </h2>
+        {/* COMMUNICATIE */}
+        <section className="communication-section">
+          <div className="section-heading">
+            <div>
+              <h2>Communicatie</h2>
+              <p>Nieuwe berichten en notificaties.</p>
+            </div>
+          </div>
 
-          <p
-            style={{
-              color: "#777",
-              marginTop: "6px",
-            }}
-          >
-            Beheer je chauffeurs, voertuigen en dagelijkse
-            operatie vanuit één omgeving.
-          </p>
-        </div>
+          <div className="communication-grid">
+            <Link href="/admin/messages" className="communication-card">
+              <div className="communication-icon">💬</div>
 
-        {/* CARDS */}
+              <div className="communication-content">
+                <span>Ongelezen berichten</span>
 
-        <section
-          style={{
-            display: "grid",
-            gridTemplateColumns:
-              "repeat(auto-fit, minmax(280px, 1fr))",
-            gap: "18px",
-          }}
-        >
-          {cards.map((card) => (
-            <button
-              key={card.title}
-              type="button"
-              onClick={() => router.push(card.path)}
-              style={{
-                textAlign: "left",
-                background: "#0b0b0b",
-                color: "#fff",
-                border: "1px solid #222",
-                borderRadius: "16px",
-                padding: "25px",
-                cursor: "pointer",
-                transition:
-                  "border-color 0.2s, transform 0.2s",
-              }}
-              onMouseEnter={(event) => {
-                event.currentTarget.style.borderColor =
-                  "#d9a72f";
-                event.currentTarget.style.transform =
-                  "translateY(-2px)";
-              }}
-              onMouseLeave={(event) => {
-                event.currentTarget.style.borderColor =
-                  "#222";
-                event.currentTarget.style.transform =
-                  "translateY(0)";
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "flex-start",
-                  gap: "15px",
-                }}
-              >
-                <div>
-                  <p
-                    style={{
-                      margin: 0,
-                      color: "#aaa",
-                      fontSize: "14px",
-                      fontWeight: 600,
-                    }}
-                  >
-                    {card.title}
-                  </p>
+                <strong>{counts.unreadMessages}</strong>
 
-                  <p
-                    style={{
-                      margin: "12px 0 0",
-                      fontSize: "36px",
-                      fontWeight: 700,
-                    }}
-                  >
-                    {card.value}
-                  </p>
-                </div>
-
-                <span
-                  style={{
-                    fontSize: "28px",
-                  }}
-                >
-                  {card.icon}
-                </span>
+                <small>
+                  {counts.unreadMessages === 1
+                    ? "1 bericht wacht op aandacht"
+                    : `${counts.unreadMessages} berichten wachten op aandacht`}
+                </small>
               </div>
 
-              <div
-                style={{
-                  marginTop: "18px",
-                  paddingTop: "15px",
-                  borderTop: "1px solid #1d1d1d",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <span
-                  style={{
-                    color: "#777",
-                    fontSize: "13px",
-                  }}
-                >
-                  {card.description}
-                </span>
+              <span className="arrow">→</span>
+            </Link>
 
-                <span
-                  style={{
-                    color: "#d9a72f",
-                    fontSize: "14px",
-                    fontWeight: 600,
-                  }}
-                >
-                  Open →
-                </span>
+            <Link
+              href="/admin/notifications"
+              className="communication-card"
+            >
+              <div className="communication-icon">🔔</div>
+
+              <div className="communication-content">
+                <span>Ongelezen notificaties</span>
+
+                <strong>{counts.unreadNotifications}</strong>
+
+                <small>
+                  {counts.unreadNotifications === 1
+                    ? "1 notificatie wacht op aandacht"
+                    : `${counts.unreadNotifications} notificaties wachten op aandacht`}
+                </small>
               </div>
-            </button>
-          ))}
-        </section>
 
-        {/* QUICK ACTIONS */}
-
-        <section
-          style={{
-            marginTop: "40px",
-            background: "#0b0b0b",
-            border: "1px solid #222",
-            borderRadius: "16px",
-            padding: "25px",
-          }}
-        >
-          <h2
-            style={{
-              marginTop: 0,
-              fontSize: "20px",
-            }}
-          >
-            Snelle acties
-          </h2>
-
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "10px",
-              marginTop: "18px",
-            }}
-          >
-            <button
-              type="button"
-              onClick={() =>
-                router.push("/admin/drivers/new")
-              }
-              style={{
-                background: "#d9a72f",
-                color: "#000",
-                border: "none",
-                borderRadius: "8px",
-                padding: "12px 17px",
-                cursor: "pointer",
-                fontWeight: 700,
-              }}
-            >
-              + Chauffeur toevoegen
-            </button>
-
-            <button
-              type="button"
-              onClick={() =>
-                router.push("/admin/vehicle/new")
-              }
-              style={{
-                background: "#171717",
-                color: "#fff",
-                border: "1px solid #333",
-                borderRadius: "8px",
-                padding: "12px 17px",
-                cursor: "pointer",
-                fontWeight: 600,
-              }}
-            >
-              + Voertuig toevoegen
-            </button>
-
-            <button
-              type="button"
-              onClick={() =>
-                router.push("/admin/applications")
-              }
-              style={{
-                background: "#171717",
-                color: "#fff",
-                border: "1px solid #333",
-                borderRadius: "8px",
-                padding: "12px 17px",
-                cursor: "pointer",
-                fontWeight: 600,
-              }}
-            >
-              📋 Aanvragen bekijken
-            </button>
+              <span className="arrow">→</span>
+            </Link>
           </div>
         </section>
 
-        {/* FOOTER */}
+        {/* OVERZICHT */}
+        <section className="section">
+          <div className="section-heading">
+            <div>
+              <h2>Overzicht</h2>
+              <p>Belangrijkste onderdelen van Imperial Cabs.</p>
+            </div>
+          </div>
 
-        <footer
-          style={{
-            marginTop: "50px",
-            paddingTop: "20px",
-            borderTop: "1px solid #1d1d1d",
-            color: "#555",
-            fontSize: "13px",
-          }}
-        >
-          Imperial Cabs B.V. · Amsterdam & omgeving
-        </footer>
+          <div className="cards-grid">
+            <DashboardCard
+              href="/admin/drivers"
+              icon="👤"
+              title="Chauffeurs"
+              count={counts.drivers}
+              label="Geregistreerde chauffeurs"
+            />
 
+            <DashboardCard
+              href="/admin/vehicle"
+              icon="🚗"
+              title="Voertuigen"
+              count={counts.vehicles}
+              label="Voertuigen in systeem"
+            />
+
+            <DashboardCard
+              href="/admin/applications"
+              icon="📋"
+              title="Aanvragen"
+              count={counts.applications}
+              label="Chauffeursaanvragen"
+            />
+
+            <DashboardCard
+              href="/admin/payments"
+              icon="💶"
+              title="Open betalingen"
+              count={counts.payments}
+              label="Betalingen open"
+            />
+
+            <DashboardCard
+              href="/admin/damage-reports"
+              icon="⚠️"
+              title="Open schades"
+              count={counts.damages}
+              label="Schademeldingen"
+            />
+
+            <DashboardCard
+              href="/admin/maintenance"
+              icon="🔧"
+              title="Onderhoud"
+              count={counts.maintenance}
+              label="Open onderhoud"
+            />
+          </div>
+        </section>
+
+        {/* SNELLE ACTIES */}
+        <section className="section">
+          <div className="section-heading">
+            <div>
+              <h2>Snelle acties</h2>
+              <p>Veelgebruikte acties direct openen.</p>
+            </div>
+          </div>
+
+          <div className="quick-actions">
+            <Link href="/admin/drivers/new">
+              + Nieuwe chauffeur
+            </Link>
+
+            <Link href="/admin/vehicle/new">
+              + Nieuw voertuig
+            </Link>
+
+            <Link href="/admin/applications">
+              📋 Aanvragen bekijken
+            </Link>
+
+            <Link href="/admin/messages/new">
+              💬 Nieuw bericht
+            </Link>
+
+            <Link href="/admin/notifications/new">
+              🔔 Nieuwe notificatie
+            </Link>
+          </div>
+        </section>
       </div>
+
+      <style jsx>{`
+        .admin-page {
+          min-height: 100vh;
+          background: #f7f6f3;
+          padding: 40px;
+        }
+
+        .container {
+          max-width: 1200px;
+          margin: 0 auto;
+        }
+
+        .header {
+          margin-bottom: 45px;
+        }
+
+        .eyebrow {
+          color: #b38a32;
+          font-size: 15px;
+          font-weight: 800;
+          letter-spacing: 3px;
+          margin-bottom: 12px;
+        }
+
+        h1 {
+          margin: 0;
+          font-size: 50px;
+          letter-spacing: -2px;
+          color: #151515;
+        }
+
+        .header p {
+          color: #777;
+          font-size: 18px;
+          margin-top: 12px;
+        }
+
+        .section {
+          margin-top: 45px;
+        }
+
+        .communication-section {
+          margin-bottom: 45px;
+        }
+
+        .section-heading {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 20px;
+        }
+
+        .section-heading h2 {
+          margin: 0 0 5px;
+          font-size: 24px;
+          color: #181818;
+        }
+
+        .section-heading p {
+          margin: 0;
+          color: #888;
+        }
+
+        .communication-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 20px;
+        }
+
+        .communication-card {
+          display: flex;
+          align-items: center;
+          gap: 18px;
+          background: #181818;
+          color: white;
+          text-decoration: none;
+          border-radius: 20px;
+          padding: 25px;
+          border: 1px solid #272727;
+          transition: 0.2s ease;
+        }
+
+        .communication-card:hover {
+          transform: translateY(-2px);
+          border-color: #b38a32;
+        }
+
+        .communication-icon {
+          width: 55px;
+          height: 55px;
+          min-width: 55px;
+          border-radius: 15px;
+          background: #2a2a2a;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 24px;
+        }
+
+        .communication-content {
+          flex: 1;
+        }
+
+        .communication-content span {
+          display: block;
+          color: #cfcfcf;
+          font-size: 14px;
+          margin-bottom: 5px;
+        }
+
+        .communication-content strong {
+          display: block;
+          color: #d9b45a;
+          font-size: 32px;
+          line-height: 1;
+          margin-bottom: 6px;
+        }
+
+        .communication-content small {
+          color: #999;
+        }
+
+        .arrow {
+          color: #d9b45a;
+          font-size: 22px;
+        }
+
+        .cards-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 20px;
+        }
+
+        .dashboard-card {
+          display: block;
+          background: white;
+          border: 1px solid #e4e1da;
+          border-radius: 20px;
+          padding: 27px;
+          text-decoration: none;
+          color: inherit;
+          transition: 0.2s ease;
+        }
+
+        .dashboard-card:hover {
+          transform: translateY(-2px);
+          border-color: #c5a45a;
+        }
+
+        .card-icon {
+          font-size: 28px;
+          margin-bottom: 20px;
+        }
+
+        .dashboard-card h3 {
+          margin: 0 0 10px;
+          font-size: 20px;
+          color: #181818;
+        }
+
+        .card-count {
+          font-size: 38px;
+          font-weight: 800;
+          color: #a47a25;
+          line-height: 1;
+          margin-bottom: 8px;
+        }
+
+        .card-label {
+          color: #888;
+          font-size: 14px;
+        }
+
+        .quick-actions {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 12px;
+        }
+
+        .quick-actions a {
+          display: inline-flex;
+          align-items: center;
+          background: white;
+          border: 1px solid #ddd8ce;
+          border-radius: 11px;
+          padding: 14px 18px;
+          color: #333;
+          text-decoration: none;
+          font-weight: 700;
+        }
+
+        .quick-actions a:hover {
+          border-color: #b38a32;
+          color: #9b7427;
+        }
+
+        .error-box {
+          background: #fff1f1;
+          color: #a33;
+          border: 1px solid #efcccc;
+          padding: 15px 18px;
+          border-radius: 12px;
+          margin-bottom: 25px;
+        }
+
+        @media (max-width: 850px) {
+          .admin-page {
+            padding: 25px 20px;
+          }
+
+          h1 {
+            font-size: 40px;
+          }
+
+          .communication-grid,
+          .cards-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        @media (max-width: 550px) {
+          .communication-card {
+            padding: 20px;
+          }
+
+          .quick-actions {
+            flex-direction: column;
+          }
+
+          .quick-actions a {
+            width: 100%;
+            box-sizing: border-box;
+          }
+        }
+      `}</style>
     </main>
+  );
+}
+
+function DashboardCard({
+  href,
+  icon,
+  title,
+  count,
+  label,
+}: {
+  href: string;
+  icon: string;
+  title: string;
+  count: number;
+  label: string;
+}) {
+  return (
+    <Link href={href} className="dashboard-card">
+      <div className="card-icon">{icon}</div>
+
+      <h3>{title}</h3>
+
+      <div className="card-count">{count}</div>
+
+      <div className="card-label">{label}</div>
+    </Link>
   );
 }
