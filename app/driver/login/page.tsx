@@ -72,9 +72,16 @@ export default function DriverLoginPage() {
           </button>
         </form>
 
-        <p className="footer">
-          Imperial Cabs B.V. · Chauffeur Portal
-        </p>
+<div className="register-link">
+  <span>Nog geen account?</span>
+  <Link href="/driver/register">
+    Account aanmaken →
+  </Link>
+</div>
+
+<p className="footer">
+  Imperial Cabs B.V. · Chauffeur Portal
+</p>
       </div>
 
       <style jsx>{`
