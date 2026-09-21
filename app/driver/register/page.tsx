@@ -85,13 +85,16 @@ export default function DriverRegisterPage() {
         status: "pending",
       });
 
-    if (driverError) {
-      setError(
-        "Het account is aangemaakt, maar het chauffeursprofiel kon niet worden aangemaakt."
-      );
-      setLoading(false);
-      return;
-    }
+  if (driverError) {
+  console.error("Driver insert error:", driverError);
+
+  setError(
+    `Het chauffeursprofiel kon niet worden aangemaakt: ${driverError.message}`
+  );
+
+  setLoading(false);
+  return;
+}
 
     /*
      * Als Supabase e-mailbevestiging gebruikt,
