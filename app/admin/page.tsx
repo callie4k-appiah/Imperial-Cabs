@@ -148,18 +148,19 @@ export default function AdminDashboard() {
   if (loading) {
     return (
       <main className="dashboard">
-        <div className="loading">Dashboard laden...</div>
+        <div className="loading">
+          Dashboard laden...
+        </div>
 
         <style jsx>{`
           .dashboard {
             min-height: 100vh;
-            background: #0a0a0a;
-            color: white;
+            background: #f7f6f3;
             padding: 50px;
           }
 
           .loading {
-            color: #d2ad5b;
+            color: #a47a25;
             font-size: 18px;
           }
         `}</style>
@@ -190,7 +191,7 @@ export default function AdminDashboard() {
           </div>
 
           <div className="system-status">
-            <span />
+            <span className="status-dot" />
             Systeem actief
           </div>
 
@@ -202,7 +203,7 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* COMMUNICATION */}
+        {/* COMMUNICATIE */}
 
         <section className="section">
 
@@ -230,13 +231,11 @@ export default function AdminDashboard() {
               href="/admin/messages"
               className="communication-card"
             >
-
               <div className="communication-icon">
                 💬
               </div>
 
               <div className="communication-text">
-
                 <span>
                   Ongelezen berichten
                 </span>
@@ -246,28 +245,20 @@ export default function AdminDashboard() {
                 </strong>
 
                 <small>
-                  Bekijk alle berichten
+                  Bekijk alle berichten →
                 </small>
-
               </div>
-
-              <div className="card-arrow">
-                →
-              </div>
-
             </Link>
 
             <Link
               href="/admin/notifications"
               className="communication-card"
             >
-
               <div className="communication-icon">
                 🔔
               </div>
 
               <div className="communication-text">
-
                 <span>
                   Ongelezen notificaties
                 </span>
@@ -277,22 +268,16 @@ export default function AdminDashboard() {
                 </strong>
 
                 <small>
-                  Bekijk alle notificaties
+                  Bekijk alle notificaties →
                 </small>
-
               </div>
-
-              <div className="card-arrow">
-                →
-              </div>
-
             </Link>
 
           </div>
 
         </section>
 
-        {/* FLEET */}
+        {/* FLEET MANAGEMENT */}
 
         <section className="section">
 
@@ -368,7 +353,7 @@ export default function AdminDashboard() {
 
         </section>
 
-        {/* QUICK ACTIONS */}
+        {/* SNELLE ACTIES */}
 
         <section className="section">
 
@@ -376,7 +361,7 @@ export default function AdminDashboard() {
 
             <div>
               <div className="section-label">
-                SNEL ACTIE
+                SNELLE ACTIES
               </div>
 
               <h2>
@@ -396,12 +381,14 @@ export default function AdminDashboard() {
               href="/admin/drivers/new"
               icon="+"
               text="Nieuwe chauffeur"
+              primary
             />
 
             <ActionButton
               href="/admin/vehicle/new"
               icon="+"
               text="Nieuw voertuig"
+              primary
             />
 
             <ActionButton
@@ -451,19 +438,24 @@ export default function AdminDashboard() {
       <style jsx>{`
 
         /* =========================
-           PAGE
+           BASIS
         ========================= */
 
         .dashboard {
           min-height: 100vh;
-          background: #0a0a0a;
-          color: #ffffff;
+          background: #f7f6f3;
+          color: #171717;
           padding: 50px;
         }
 
         .dashboard-container {
           max-width: 1200px;
           margin: 0 auto;
+        }
+
+        .loading {
+          color: #a47a25;
+          font-size: 18px;
         }
 
         /* =========================
@@ -475,28 +467,28 @@ export default function AdminDashboard() {
           justify-content: space-between;
           align-items: flex-start;
           gap: 30px;
-          margin-bottom: 65px;
+          margin-bottom: 60px;
         }
 
         .brand {
-          color: #d2ad5b;
+          color: #b18732;
           font-size: 13px;
           font-weight: 900;
           letter-spacing: 4px;
-          margin-bottom: 15px;
+          margin-bottom: 14px;
         }
 
         h1 {
           margin: 0;
-          font-size: 54px;
+          color: #151515;
+          font-size: 52px;
           line-height: 1;
           letter-spacing: -2px;
-          color: #ffffff;
         }
 
         .header p {
-          margin: 15px 0 0;
-          color: #888888;
+          margin: 14px 0 0;
+          color: #777;
           font-size: 17px;
         }
 
@@ -504,22 +496,24 @@ export default function AdminDashboard() {
           display: flex;
           align-items: center;
           gap: 9px;
-          background: #151515;
-          border: 1px solid #363636;
-          border-radius: 30px;
+
+          background: #181818;
+          color: white;
+
           padding: 12px 17px;
-          color: #bdbdbd;
+          border-radius: 30px;
+
           font-size: 13px;
           font-weight: 700;
+
           white-space: nowrap;
         }
 
-        .system-status span {
+        .status-dot {
           width: 8px;
           height: 8px;
           border-radius: 50%;
           background: #d2ad5b;
-          box-shadow: 0 0 12px rgba(210, 173, 91, 0.7);
         }
 
         /* =========================
@@ -527,39 +521,35 @@ export default function AdminDashboard() {
         ========================= */
 
         .section {
-          margin-top: 60px;
-        }
-
-        .section:first-of-type {
-          margin-top: 0;
+          margin-top: 55px;
         }
 
         .section-header {
-          margin-bottom: 25px;
+          margin-bottom: 22px;
         }
 
         .section-label {
-          color: #d2ad5b;
+          color: #b18732;
           font-size: 11px;
           font-weight: 900;
           letter-spacing: 3px;
-          margin-bottom: 8px;
+          margin-bottom: 7px;
         }
 
         .section-header h2 {
           margin: 0;
+          color: #171717;
           font-size: 27px;
-          color: #ffffff;
         }
 
         .section-header p {
           margin: 7px 0 0;
-          color: #777777;
+          color: #777;
           font-size: 15px;
         }
 
         /* =========================
-           COMMUNICATION
+           COMMUNICATIE
         ========================= */
 
         .communication-grid {
@@ -574,11 +564,10 @@ export default function AdminDashboard() {
           gap: 20px;
 
           min-height: 125px;
-
           padding: 25px;
 
-          background: #151515;
-          border: 1px solid #3a3a3a;
+          background: #181818;
+          border: 1px solid #181818;
           border-radius: 20px;
 
           color: white;
@@ -588,13 +577,10 @@ export default function AdminDashboard() {
         }
 
         .communication-card:hover {
-          background: #1b1b1b;
-          border-color: #d2ad5b;
+          background: #242424;
+          border-color: #c9a24a;
           transform: translateY(-3px);
-
-          box-shadow:
-            0 15px 35px rgba(0, 0, 0, 0.4),
-            0 0 25px rgba(210, 173, 91, 0.08);
+          box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
         }
 
         .communication-icon {
@@ -606,8 +592,8 @@ export default function AdminDashboard() {
           align-items: center;
           justify-content: center;
 
-          background: #211d14;
-          border: 1px solid #5c4923;
+          background: #2a2418;
+          border: 1px solid #6a5325;
           border-radius: 15px;
 
           font-size: 24px;
@@ -619,9 +605,9 @@ export default function AdminDashboard() {
 
         .communication-text span {
           display: block;
-          color: #999999;
+          color: #bdbdbd;
           font-size: 13px;
-          margin-bottom: 5px;
+          margin-bottom: 6px;
         }
 
         .communication-text strong {
@@ -633,14 +619,9 @@ export default function AdminDashboard() {
         }
 
         .communication-text small {
-          color: #777777;
+          color: #dddddd;
           font-size: 13px;
-        }
-
-        .card-arrow {
-          color: #d2ad5b;
-          font-size: 31px;
-          font-weight: 700;
+          font-weight: 600;
         }
 
         /* =========================
@@ -657,53 +638,55 @@ export default function AdminDashboard() {
           display: block;
 
           min-height: 165px;
+          padding: 26px;
 
-          padding: 25px;
-
-          background: #151515;
-          border: 1px solid #383838;
+          background: #ffffff;
+          border: 1px solid #dedbd4;
           border-radius: 19px;
 
-          color: white;
+          color: #171717;
           text-decoration: none;
 
           transition: all 0.2s ease;
+
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.025);
         }
 
         .fleet-card:hover {
-          background: #1b1b1b;
-          border-color: #d2ad5b;
+          border-color: #b18732;
           transform: translateY(-3px);
 
           box-shadow:
-            0 12px 30px rgba(0, 0, 0, 0.35);
+            0 10px 25px rgba(0, 0, 0, 0.08),
+            0 0 0 1px rgba(177, 135, 50, 0.15);
         }
 
         .fleet-icon {
-          width: 46px;
-          height: 46px;
+          width: 47px;
+          height: 47px;
 
           display: flex;
           align-items: center;
           justify-content: center;
 
-          background: #211d14;
-          border: 1px solid #5c4923;
+          background: #f5f0e5;
+          border: 1px solid #ded0ad;
           border-radius: 12px;
 
           font-size: 21px;
 
-          margin-bottom: 20px;
+          margin-bottom: 19px;
         }
 
         .fleet-card h3 {
-          margin: 0 0 13px;
+          margin: 0 0 12px;
+
+          color: #171717;
           font-size: 18px;
-          color: #eeeeee;
         }
 
         .fleet-count {
-          color: #d2ad5b;
+          color: #a47a25;
           font-size: 38px;
           font-weight: 900;
           line-height: 1;
@@ -711,18 +694,18 @@ export default function AdminDashboard() {
         }
 
         .fleet-text {
-          color: #777777;
+          color: #777;
           font-size: 13px;
         }
 
         /* =========================
-           QUICK ACTIONS
+           SNELLE ACTIES
         ========================= */
 
         .actions {
           display: flex;
           flex-wrap: wrap;
-          gap: 13px;
+          gap: 12px;
         }
 
         .action-button {
@@ -732,34 +715,46 @@ export default function AdminDashboard() {
           gap: 9px;
 
           min-height: 48px;
-
           padding: 0 21px;
 
-          background: #d2ad5b;
-          color: #080808;
+          background: #181818;
+          color: #ffffff;
 
-          border: 1px solid #d2ad5b;
+          border: 1px solid #181818;
           border-radius: 11px;
 
           text-decoration: none;
 
           font-size: 14px;
-          font-weight: 900;
-
-          box-shadow:
-            0 5px 15px rgba(0, 0, 0, 0.3);
+          font-weight: 800;
 
           transition: all 0.2s ease;
         }
 
         .action-button:hover {
-          background: #e4c574;
-          border-color: #e4c574;
+          background: #000000;
+          border-color: #c9a24a;
+          color: #ffffff;
 
-          transform: translateY(-3px);
+          transform: translateY(-2px);
 
           box-shadow:
-            0 10px 25px rgba(210, 173, 91, 0.18);
+            0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .action-button.primary {
+          background: #c9a24a;
+          color: #111111;
+          border-color: #c9a24a;
+        }
+
+        .action-button.primary:hover {
+          background: #dfbd68;
+          border-color: #dfbd68;
+          color: #111111;
+
+          box-shadow:
+            0 8px 22px rgba(174, 132, 39, 0.25);
         }
 
         .action-icon {
@@ -772,9 +767,9 @@ export default function AdminDashboard() {
         ========================= */
 
         .error {
-          background: #291616;
-          border: 1px solid #5c2929;
-          color: #e3aaaa;
+          background: #fff1f1;
+          border: 1px solid #e5c5c5;
+          color: #9b3838;
 
           padding: 15px 18px;
           border-radius: 12px;
@@ -791,12 +786,12 @@ export default function AdminDashboard() {
           justify-content: space-between;
           align-items: center;
 
-          margin-top: 75px;
+          margin-top: 70px;
           padding-top: 25px;
 
-          border-top: 1px solid #292929;
+          border-top: 1px solid #ddd9d1;
 
-          color: #666666;
+          color: #777;
           font-size: 13px;
         }
 
@@ -807,7 +802,7 @@ export default function AdminDashboard() {
         }
 
         .footer strong {
-          color: #d2ad5b;
+          color: #b18732;
           letter-spacing: 2px;
         }
 
@@ -883,10 +878,6 @@ export default function AdminDashboard() {
   );
 }
 
-/* =========================
-   DASHBOARD CARD
-========================= */
-
 function DashboardCard({
   href,
   icon,
@@ -905,7 +896,6 @@ function DashboardCard({
       href={href}
       className="fleet-card"
     >
-
       <div className="fleet-icon">
         {icon}
       </div>
@@ -921,28 +911,27 @@ function DashboardCard({
       <div className="fleet-text">
         {text}
       </div>
-
     </Link>
   );
 }
-
-/* =========================
-   ACTION BUTTON
-========================= */
 
 function ActionButton({
   href,
   icon,
   text,
+  primary = false,
 }: {
   href: string;
   icon: string;
   text: string;
+  primary?: boolean;
 }) {
   return (
     <Link
       href={href}
-      className="action-button"
+      className={`action-button ${
+        primary ? "primary" : ""
+      }`}
     >
       <span className="action-icon">
         {icon}
